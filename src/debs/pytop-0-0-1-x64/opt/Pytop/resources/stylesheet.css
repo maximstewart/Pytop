@@ -1,0 +1,13 @@
+viewport,
+treeview,
+treeview > header,
+notebook > stack,
+notebook > header {
+    background-color: rgba(0, 0, 0, 0.24);
+}
+
+
+notebook > header {
+    background-color: rgba(0, 0, 0, 0.24);
+    border-color: rgba(0, 232, 255, 0.64);
+}
