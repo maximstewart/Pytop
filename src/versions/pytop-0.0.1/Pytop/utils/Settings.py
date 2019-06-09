@@ -62,8 +62,9 @@ class Settings:
 
         return monitors
 
-    def isHideHiddenFiles(self):
-        return self.hideHiddenFiles
+
+    def returnBuilder(self):
+        return self.builder
 
     def returnUserHome(self):
         return self.usrHome
@@ -76,6 +77,9 @@ class Settings:
 
     def returnWebHome(self):
         return self.webHome
+
+    def isHideHiddenFiles(self):
+        return self.hideHiddenFiles
 
     def mouseOver(self, widget, eve, args):
         hand_cursor = gdk.Cursor(gdk.CursorType.HAND2)

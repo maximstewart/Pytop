@@ -14,12 +14,11 @@ from os.path import isdir, isfile, join
 
 class Icon:
     def __init__(self):
-        self.GTK_ORIENTATION = 1   # HORIZONTAL (0) VERTICAL (1)
-        self.iconImageWxH    = [128, -1]
-        self.iconSystem      = [72, 72]
-        self.iconWxH         = [128, -1]
-        self.iconMargins     = 8
-        self.usrHome         = os.path.expanduser('~')
+        self.GTK_ORIENTATION    = 1   # HORIZONTAL (0) VERTICAL (1)
+        self.iconContainerWxH   = [128, -1]
+        self.systemIconImageWxH = [72, 72]
+        self.viIconWxH          = [128, -1]
+        self.usrHome            = os.path.expanduser('~')
 
 
     def createIcon(self, dir, file):
@@ -27,17 +26,16 @@ class Icon:
         eveBox       = gtk.EventBox()
         icon         = gtk.Box()
         label        = gtk.Label()
-        thumbnl      = self.defineIconImage(file, fullPathFile)
+        thumbnl      = self.getIconImage(file, fullPathFile)
 
         label.set_max_width_chars(1)
         label.set_ellipsize(3)       # ELLIPSIZE_END (3)
         label.set_lines(2)
         label.set_line_wrap(True)
         label.set_line_wrap_mode(2)  # WRAP_WORD (0)  WRAP_CHAR (1)  WRAP_WORD_CHAR (2)
-        label.set_width_chars(1)
         label.set_text(file)
 
-        icon.set_size_request(self.iconWxH[0], self.iconWxH[1]);
+        icon.set_size_request(self.iconContainerWxH[0], self.iconContainerWxH[1]);
         icon.set_property('orientation', self.GTK_ORIENTATION)
         icon.add(thumbnl)
         icon.add(label)
@@ -46,7 +44,7 @@ class Icon:
         eveBox.show_all()
         return eveBox
 
-    def defineIconImage(self, file, fullPathFile):
+    def getIconImage(self, file, fullPathFile):
         thumbnl    = gtk.Image()
         vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
         imagesList = ('.png', '.jpg', '.jpeg', '.gif')
@@ -55,16 +53,32 @@ class Icon:
             fileHash   = hashlib.sha256(str.encode(fullPathFile)).hexdigest()
             hashImgpth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
             if isfile(hashImgpth) == False:
-                self.generateThumbnail(fullPathFile, hashImgpth)
+                self.generateVideoThumbnail(fullPathFile, hashImgpth)
 
-            thumbnl = self.createGtkImage(hashImgpth, self.iconImageWxH)
+            thumbnl = self.createIconImageFromBuffer(hashImgpth, self.viIconWxH)
         elif file.lower().endswith(imagesList):
-            thumbnl = self.createGtkImage(fullPathFile, self.iconImageWxH)
+            thumbnl = self.createIconImageFromBuffer(fullPathFile, self.viIconWxH)
         else:
-            thumbPth = self.getSystemThumbnail(fullPathFile, self.iconSystem[0])
-            thumbnl  = self.createGtkImage(thumbPth, self.iconSystem)
+            thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
+            thumbnl  = self.createIconImageFromBuffer(thumbPth, self.systemIconImageWxH)
 
         return thumbnl
+
+    def createIconImageFromBuffer(self, path, wxh):
+        try:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename  = path,
+            width     = wxh[0],
+            height    = wxh[1],
+            preserve_aspect_ratio = True)
+            return gtk.Image.new_from_pixbuf(pixbuf)
+        except Exception as e:
+            print(e)
+
+        return gtk.Image()
+
+    def generateVideoThumbnail(self, fullPathFile, hashImgpth):
+        subprocess.call(["ffmpegthumbnailer", "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPathFile, "-o", hashImgpth])
 
     def getSystemThumbnail(self, filename,size):
         final_filename = ""
@@ -79,19 +93,3 @@ class Icon:
                 final_filename = icon_file.get_filename()
 
             return final_filename
-
-    def generateThumbnail(self, fullPathFile, hashImgpth):
-        subprocess.call(["ffmpegthumbnailer", "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPathFile, "-o", hashImgpth])
-
-    def createGtkImage(self, path, wxh):
-        try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename  = path,
-            width     = wxh[0],
-            height    = wxh[1],
-            preserve_aspect_ratio = True)
-            return gtk.Image.new_from_pixbuf(pixbuf)
-        except Exception as e:
-            print(e)
-
-        return gtk.Image()
