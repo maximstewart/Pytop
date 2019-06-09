@@ -13,13 +13,12 @@ from os.path import isdir, isfile, join
 
 
 class Icon:
-    def __init__(self):
-        self.GTK_ORIENTATION    = 1   # HORIZONTAL (0) VERTICAL (1)
-        self.iconContainerWxH   = [128, -1]
-        self.systemIconImageWxH = [72, 72]
-        self.viIconWxH          = [128, -1]
-        self.usrHome            = os.path.expanduser('~')
-
+    def __init__(self, settings):
+        self.usrHome            = settings.returnUserHome()
+        self.GTK_ORIENTATION    = settings.returnIconImagePos()
+        self.iconContainerWxH   = settings.returnContainerWH()
+        self.systemIconImageWxH = settings.returnSystemIconImageWH()
+        self.viIconWxH          = settings.returnVIIconWH()
 
     def createIcon(self, dir, file):
         fullPathFile = dir + "/" + file

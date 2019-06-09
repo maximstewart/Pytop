@@ -22,6 +22,10 @@ class Settings:
         self.desktopPath     = self.usrHome + "/Desktop"
         self.ColumnSize      = 10
         self.webHome         = 'http://webfm.com/'
+        self.GTK_ORIENTATION    = 1   # HORIZONTAL (0) VERTICAL (1)
+        self.iconContainerWxH   = [128, -1]
+        self.systemIconImageWxH = [72, 72]
+        self.viIconWxH          = [128, -1]
 
 
     def attachBuilder(self, builder):
@@ -63,23 +67,16 @@ class Settings:
         return monitors
 
 
-    def returnBuilder(self):
-        return self.builder
-
-    def returnUserHome(self):
-        return self.usrHome
-
-    def returnDesktopPath(self):
-        return self.usrHome + "/Desktop"
-
-    def returnColumnSize(self):
-        return self.ColumnSize
-
-    def returnWebHome(self):
-        return self.webHome
-
-    def isHideHiddenFiles(self):
-        return self.hideHiddenFiles
+    def returnBuilder(self):           return self.builder
+    def returnUserHome(self):          return self.usrHome
+    def returnDesktopPath(self):       return self.usrHome + "/Desktop"
+    def returnColumnSize(self):        return self.ColumnSize
+    def returnIconImagePos(self):      return self.GTK_ORIENTATION
+    def returnContainerWH(self):       return self.iconContainerWxH
+    def returnSystemIconImageWH(self): return self.systemIconImageWxH
+    def returnVIIconWH(self):          return self.viIconWxH
+    def returnWebHome(self):           return self.webHome
+    def isHideHiddenFiles(self):       return self.hideHiddenFiles
 
     def mouseOver(self, widget, eve, args):
         hand_cursor = gdk.Cursor(gdk.CursorType.HAND2)

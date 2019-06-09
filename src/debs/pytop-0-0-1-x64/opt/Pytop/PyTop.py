@@ -14,16 +14,14 @@ from utils import Settings, Events
 
 class Main:
     def __init__(self):
-        # Needed for glade file load to work right...
-        webkit.WebView()
+        webkit.WebView()  # Needed for glade file to load...
 
         self.builder     = gtk.Builder()
         self.settings    = Settings()
         self.settings.attachBuilder(self.builder)
-        self.builder.connect_signals(Events(self.builder, self.settings))
+        self.builder.connect_signals(Events(self.settings))
 
         window = self.settings.createWindow()
-
         window.fullscreen()
         window.show_all()
 

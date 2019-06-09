@@ -63,7 +63,7 @@ class Grid:
         loadProgress.set_fraction(0.0)
         self.clearGrid(self.desktop)
         for file in files:
-            eveBox = Icon().createIcon(dirPath, file)
+            eveBox = Icon(self.settings).createIcon(dirPath, file)
             # self.drag.connectEvents(self.desktop, eveBox)
             eveBox.connect("button_press_event", self.iconClickEventManager, (eveBox,))
             eveBox.connect("enter_notify_event", self.settings.mouseOver, ())

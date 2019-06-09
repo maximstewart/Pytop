@@ -6,21 +6,21 @@ gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk as gdk
 
 # Python imports
-import os, threading
-from .Grid     import  Grid
+import threading
+from .Grid     import Grid
 from .Dragging import Dragging
 from threading import Thread
 
 
 gdk.threads_init()
 class Events:
-    def __init__(self, builder, settings):
-        self.builder     = builder
+    def __init__(self, settings):
         self.settings    = settings
+        self.builder     = self.settings.returnBuilder()
         self.desktop     = self.builder.get_object("Desktop")
+        self.webview     = self.builder.get_object("webview")
         self.desktopPath = self.settings.returnDesktopPath()
 
-        self.webview = self.builder.get_object("webview")
         self.settings.setDefaultWebviewSettings(self.webview, self.webview.get_settings())
         self.webview.load_uri(self.settings.returnWebHome())
 
