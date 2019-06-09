@@ -4,7 +4,6 @@
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-gi.require_version('WebKit2', '4.0')
 
 from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
