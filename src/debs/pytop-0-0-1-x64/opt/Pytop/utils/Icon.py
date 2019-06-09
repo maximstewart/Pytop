@@ -8,14 +8,15 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
 from gi.repository import GdkPixbuf
 
-import os, hashlib
+import os, subprocess, hashlib
 from os.path import isdir, isfile, join
 
 
 class Icon:
     def __init__(self):
         self.GTK_ORIENTATION = 1   # HORIZONTAL (0) VERTICAL (1)
-        self.iconImageWxH    = [64, 64]
+        self.iconImageWxH    = [128, -1]
+        self.iconSystem      = [72, 72]
         self.iconWxH         = [128, -1]
         self.iconMargins     = 8
         self.usrHome         = os.path.expanduser('~')
@@ -60,8 +61,8 @@ class Icon:
         elif file.lower().endswith(imagesList):
             thumbnl = self.createGtkImage(fullPathFile, self.iconImageWxH)
         else:
-            thumbPth = self.getSystemThumbnail(fullPathFile, self.iconImageWxH[0])
-            thumbnl  = self.createGtkImage(thumbPth, self.iconImageWxH)
+            thumbPth = self.getSystemThumbnail(fullPathFile, self.iconSystem[0])
+            thumbnl  = self.createGtkImage(thumbPth, self.iconSystem)
 
         return thumbnl
 
