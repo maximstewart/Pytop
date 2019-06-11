@@ -1,6 +1,5 @@
 
-import subprocess
-
+import os, shutil, subprocess
 
 class FileHandler:
     def __init__(self):
@@ -23,9 +22,6 @@ class FileHandler:
         self.MPLAYER_WH   = " -xy 1600 -geometry 50%:50% ";
         self.MPV_WH       = " -geometry 50%:50% ";
 
-        self.selectedFile = None
-
-
 
     def openFile(self, file):
         print("Opening: " + file)
@@ -45,10 +41,14 @@ class FileHandler:
             subprocess.Popen(['xdg-open', file])
 
 
-    def renameFile(self, oldFileName, newFileName):
+    def createFile(self, newFileName):
+        pass
+
+    def updateFile(self, oldFileName, newFileName):
         try:
             print("Renaming...")
             print(oldFileName + "  -->  " + newFileName)
+            os.rename(oldFileName, newFileName)
             return 0
         except Exception as e:
             print("An error occured renaming the file:")
@@ -59,8 +59,29 @@ class FileHandler:
         try:
             print("Deleting...")
             print(toDeleteFile)
-            return 0
+            if os.path.exists(toDeleteFile):
+                if os.path.isfile(toDeleteFile):
+                    os.remove(toDeleteFile)
+                elif os.path.isdir(toDeleteFile):
+                    shutil.rmtree(toDeleteFile)
+                else:
+                    print("An error occured deleting the file:")
+                    return 1
+            else:
+                print("The folder/file does not exist")
+                return 1
         except Exception as e:
             print("An error occured deleting the file:")
             print(e)
             return 1
+
+        return 0
+
+    def copyFile(self):
+        pass
+
+    def cutFile(self):
+        pass
+
+    def pasteFile(self):
+        pass

@@ -155,14 +155,16 @@ class Grid:
 
 
     # Pass through file control events
-    def renameFile(self, file):
+    def createFile(arg):
+        pass
+
+    def updateFile(self, file):
         newName = self.currentPath + "/" + file
-        status  = self.filehandler.renameFile(self.selectedFile, newName)
+        status  = self.filehandler.updateFile(self.selectedFile, newName)
 
         if status == 0:
             self.selectedFile = newName
             self.generateDirectoryGrid(self.currentPath)
-
 
     def deleteFile(self):
         status = self.filehandler.deleteFile(self.selectedFile)
@@ -170,3 +172,12 @@ class Grid:
         if status == 0:
             self.selectedFile = ""
             self.generateDirectoryGrid(self.currentPath)
+
+    def copyFile(self):
+        pass
+
+    def cutFile(self):
+        pass
+
+    def pasteFile(self):
+        pass

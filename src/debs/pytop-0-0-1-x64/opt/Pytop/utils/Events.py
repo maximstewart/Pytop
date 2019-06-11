@@ -31,9 +31,7 @@ class Events:
         selectedDirDialog.add_filter(filefilter)
         selectedDirDialog.set_filename(self.desktopPath)
 
-        self.grid         = None
-        self.selectedFile = None
-
+        self.grid = None
         self.setDir(selectedDirDialog)
 
 
@@ -44,19 +42,21 @@ class Events:
         # Grid(self.desktop, self.settings).generateDirectoryGrid(newPath)
 
     def showGridControlMenu(self, widget, data=None):
-        self.selectedFile = widget
         popover = self.builder.get_object("gridControlMenu")
         popover.show_all()
         popover.popup()
 
 
     # File control events
-    def renameFile(self, widget, data=None):
+    def createFile(self):
+        pass
+
+    def updateFile(self, widget, data=None):
         newName = widget.get_text().strip()
         if data and data.keyval == 65293:    # Enter key event
-            self.grid.renameFile(newName)
+            self.grid.updateFile(newName)
         elif data == None:                   # Save button 'event'
-            self.grid.renameFile(newName)
+            self.grid.updateFile(newName)
 
     def deleteFile(self, widget, data=None):
         self.grid.deleteFile()
@@ -65,6 +65,9 @@ class Events:
         pass
 
     def cutFile(self):
+        pass
+
+    def pasteFile(self):
         pass
 
 
