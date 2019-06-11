@@ -1,25 +1,26 @@
 
 # Gtk Imports
-import gi
+import gi, threading
+gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
+from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
 
+
 # Python imports
-import threading
 from .Grid     import Grid
 from .Dragging import Dragging
+
 from threading import Thread
 
-
-gdk.threads_init()
 class Events:
     def __init__(self, settings):
-        self.settings    = settings
-        self.builder     = self.settings.returnBuilder()
-        self.desktop     = self.builder.get_object("Desktop")
-        self.webview     = self.builder.get_object("webview")
-        self.desktopPath = self.settings.returnDesktopPath()
+        self.settings     = settings
+        self.builder      = self.settings.returnBuilder()
+        self.desktop      = self.builder.get_object("Desktop")
+        self.webview      = self.builder.get_object("webview")
+        self.desktopPath  = self.settings.returnDesktopPath()
 
         self.settings.setDefaultWebviewSettings(self.webview, self.webview.get_settings())
         self.webview.load_uri(self.settings.returnWebHome())
@@ -30,19 +31,44 @@ class Events:
         selectedDirDialog.add_filter(filefilter)
         selectedDirDialog.set_filename(self.desktopPath)
 
+        self.grid         = None
+        self.selectedFile = None
+
         self.setDir(selectedDirDialog)
 
 
     def setDir(self, widget, data=None):
-        newPath = widget.get_filename()
-        Thread(target=Grid(self.desktop, self.settings).generateDirectoryGrid, args=(newPath,)).start()
-
+        newPath   = widget.get_filename()
+        self.grid = Grid(self.desktop, self.settings)
+        Thread(target=self.grid.generateDirectoryGrid, args=(newPath,)).start()
+        # Grid(self.desktop, self.settings).generateDirectoryGrid(newPath)
 
     def showGridControlMenu(self, widget, data=None):
+        self.selectedFile = widget
         popover = self.builder.get_object("gridControlMenu")
         popover.show_all()
         popover.popup()
 
+
+    # File control events
+    def renameFile(self, widget, data=None):
+        newName = widget.get_text().strip()
+        if data and data.keyval == 65293:    # Enter key event
+            self.grid.renameFile(newName)
+        elif data == None:                   # Save button 'event'
+            self.grid.renameFile(newName)
+
+    def deleteFile(self, widget, data=None):
+        self.grid.deleteFile()
+
+    def copyFile(self):
+        pass
+
+    def cutFile(self):
+        pass
+
+
+    # Webview events
     def showWebview(self, widget):
         self.builder.get_object("webViewer").popup()
 

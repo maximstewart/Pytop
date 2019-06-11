@@ -8,7 +8,7 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
 from gi.repository import GdkPixbuf
 
-import os, subprocess, hashlib
+import os, hashlib
 from os.path import isdir, isfile, join
 
 
@@ -51,10 +51,7 @@ class Icon:
         if file.lower().endswith(vidsList):
             fileHash   = hashlib.sha256(str.encode(fullPathFile)).hexdigest()
             hashImgpth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
-            if isfile(hashImgpth) == False:
-                self.generateVideoThumbnail(fullPathFile, hashImgpth)
-
-            thumbnl = self.createIconImageFromBuffer(hashImgpth, self.viIconWxH)
+            thumbnl    = self.createIconImageFromBuffer(hashImgpth, self.viIconWxH)
         elif file.lower().endswith(imagesList):
             thumbnl = self.createIconImageFromBuffer(fullPathFile, self.viIconWxH)
         else:
@@ -75,9 +72,6 @@ class Icon:
             print(e)
 
         return gtk.Image()
-
-    def generateVideoThumbnail(self, fullPathFile, hashImgpth):
-        subprocess.call(["ffmpegthumbnailer", "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPathFile, "-o", hashImgpth])
 
     def getSystemThumbnail(self, filename,size):
         final_filename = ""

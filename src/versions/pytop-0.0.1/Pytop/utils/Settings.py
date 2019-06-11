@@ -16,16 +16,17 @@ class Settings:
         self.DEFAULTCOLOR    = gdk.RGBA(0.0, 0.0, 0.0, 0.0)   # ~#00000000
         self.MOUSEOVERCOLOR  = gdk.RGBA(0.0, 0.9, 1.0, 0.64)  # ~#00e8ff
         self.SELECTEDCOLOR   = gdk.RGBA(0.4, 0.5, 0.1, 0.84)
+        self.GTK_ORIENTATION = 1   # HORIZONTAL (0) VERTICAL (1)
+        self.THUMB_GENERATOR = "ffmpegthumbnailer"
 
-        self.hideHiddenFiles = True
-        self.usrHome         = os.path.expanduser('~')
-        self.desktopPath     = self.usrHome + "/Desktop"
-        self.ColumnSize      = 10
-        self.webHome         = 'http://webfm.com/'
-        self.GTK_ORIENTATION    = 1   # HORIZONTAL (0) VERTICAL (1)
-        self.iconContainerWxH   = [128, -1]
+        self.hideHiddenFiles    = True
+        self.webHome            = 'http://webfm.com/'
+        self.usrHome            = os.path.expanduser('~')
+        self.desktopPath        = self.usrHome + "/Desktop"
+        self.iconContainerWxH   = [128, 128]
         self.systemIconImageWxH = [72, 72]
-        self.viIconWxH          = [128, -1]
+        self.viIconWxH          = [256, 128]
+        self.ColumnSize         = 8
 
 
     def attachBuilder(self, builder):
@@ -70,8 +71,9 @@ class Settings:
     def returnBuilder(self):           return self.builder
     def returnUserHome(self):          return self.usrHome
     def returnDesktopPath(self):       return self.usrHome + "/Desktop"
-    def returnColumnSize(self):        return self.ColumnSize
     def returnIconImagePos(self):      return self.GTK_ORIENTATION
+    def getThumbnailGenerator(self):   return self.THUMB_GENERATOR
+    def returnColumnSize(self):        return self.ColumnSize
     def returnContainerWH(self):       return self.iconContainerWxH
     def returnSystemIconImageWH(self): return self.systemIconImageWxH
     def returnVIIconWH(self):          return self.viIconWxH
