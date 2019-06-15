@@ -1,5 +1,11 @@
 
-import os, shutil, subprocess
+import os, shutil, subprocess, threading
+
+
+def threaded(fn):
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+    return wrapper
 
 class FileHandler:
     def __init__(self):
@@ -22,7 +28,7 @@ class FileHandler:
         self.MPLAYER_WH   = " -xy 1600 -geometry 50%:50% ";
         self.MPV_WH       = " -geometry 50%:50% ";
 
-
+    @threaded
     def openFile(self, file):
         print("Opening: " + file)
         if file.lower().endswith(self.vids):

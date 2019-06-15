@@ -9,17 +9,15 @@ from gi.repository import Gdk as gdk
 
 class Settings:
     def __init__(self):
-        self.builder         = None
-        self.hoveredFile     = None
-        self.selectedFile    = None
-
-        self.DEFAULTCOLOR    = gdk.RGBA(0.0, 0.0, 0.0, 0.0)   # ~#00000000
-        self.MOUSEOVERCOLOR  = gdk.RGBA(0.0, 0.9, 1.0, 0.64)  # ~#00e8ff
-        self.SELECTEDCOLOR   = gdk.RGBA(0.4, 0.5, 0.1, 0.84)
-        self.GTK_ORIENTATION = 1   # HORIZONTAL (0) VERTICAL (1)
-        self.THUMB_GENERATOR = "ffmpegthumbnailer"
-
+        self.builder            = None
         self.hideHiddenFiles    = True
+
+        self.GTK_ORIENTATION    = 1   # HORIZONTAL (0) VERTICAL (1)
+        self.THUMB_GENERATOR    = "ffmpegthumbnailer"
+        self.DEFAULTCOLOR       = gdk.RGBA(0.0, 0.0, 0.0, 0.0)   # ~#00000000
+        self.MOUSEOVERCOLOR     = gdk.RGBA(0.0, 0.9, 1.0, 0.64)  # ~#00e8ff
+        self.SELECTEDCOLOR      = gdk.RGBA(0.4, 0.5, 0.1, 0.84)
+
         self.webHome            = 'http://webfm.com/'
         self.usrHome            = os.path.expanduser('~')
         self.desktopPath        = self.usrHome + "/Desktop"
@@ -79,27 +77,6 @@ class Settings:
     def returnVIIconWH(self):          return self.viIconWxH
     def returnWebHome(self):           return self.webHome
     def isHideHiddenFiles(self):       return self.hideHiddenFiles
-
-    def mouseOver(self, widget, eve, args):
-        hand_cursor = gdk.Cursor(gdk.CursorType.HAND2)
-        self.builder.get_object("Window").get_window().set_cursor(hand_cursor)
-        if widget != self.selectedFile:
-            widget.override_background_color(gtk.StateType.NORMAL, self.MOUSEOVERCOLOR)
-
-    def mouseOut(self, widget, eve, args):
-        watch_cursor = gdk.Cursor(gdk.CursorType.LEFT_PTR)
-        self.builder.get_object("Window").get_window().set_cursor(watch_cursor)
-        if widget != self.selectedFile:
-            widget.override_background_color(gtk.StateType.NORMAL, self.DEFAULTCOLOR)
-
-    def setSelected(self, eveBox):
-      if self.selectedFile:
-          self.selectedFile.override_background_color(gtk.StateType.NORMAL, self.DEFAULTCOLOR)
-
-      eveBox.override_background_color(gtk.StateType.NORMAL, self.SELECTEDCOLOR)
-      self.selectedFile = eveBox
-
-
 
     def setDefaultWebviewSettings(self, widget, settings=None):
         # Usability

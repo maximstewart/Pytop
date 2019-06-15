@@ -8,40 +8,30 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
 from gi.repository import GdkPixbuf
 
-import os, hashlib
+import os, subprocess, hashlib, threading
 from os.path import isdir, isfile, join
 
 
+def threaded(fn):
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+    return wrapper
+
 class Icon:
     def __init__(self, settings):
-        self.usrHome            = settings.returnUserHome()
+        self.settings           = settings
+        self.thubnailGen        = self.settings.getThumbnailGenerator()
+
         self.GTK_ORIENTATION    = settings.returnIconImagePos()
+        self.usrHome            = settings.returnUserHome()
         self.iconContainerWxH   = settings.returnContainerWH()
         self.systemIconImageWxH = settings.returnSystemIconImageWH()
         self.viIconWxH          = settings.returnVIIconWH()
 
     def createIcon(self, dir, file):
         fullPathFile = dir + "/" + file
-        eveBox       = gtk.EventBox()
-        icon         = gtk.Box()
-        label        = gtk.Label()
         thumbnl      = self.getIconImage(file, fullPathFile)
-
-        label.set_max_width_chars(1)
-        label.set_ellipsize(3)       # ELLIPSIZE_END (3)
-        label.set_lines(2)
-        label.set_line_wrap(True)
-        label.set_line_wrap_mode(2)  # WRAP_WORD (0)  WRAP_CHAR (1)  WRAP_WORD_CHAR (2)
-        label.set_text(file)
-
-        icon.set_size_request(self.iconContainerWxH[0], self.iconContainerWxH[1]);
-        icon.set_property('orientation', self.GTK_ORIENTATION)
-        icon.add(thumbnl)
-        icon.add(label)
-
-        eveBox.add(icon)
-        eveBox.show_all()
-        return eveBox
+        return thumbnl
 
     def getIconImage(self, file, fullPathFile):
         thumbnl    = gtk.Image()
@@ -51,16 +41,31 @@ class Icon:
         if file.lower().endswith(vidsList):
             fileHash   = hashlib.sha256(str.encode(fullPathFile)).hexdigest()
             hashImgpth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
-            thumbnl    = self.createIconImageFromBuffer(hashImgpth, self.viIconWxH)
+
+            # Generate any thumbnails beforehand...
+            try:
+                if isfile(hashImgpth) == False:
+                    self.generateVideoThumbnail(fullPathFile, hashImgpth)
+                    thumbnl = self.createIconImageBuffer(hashImgpth, self.viIconWxH)
+                else:
+                    thumbnl = self.createIconImageBuffer(hashImgpth, self.viIconWxH)
+            except Exception as e:
+                print(e)
+                thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
+                thumbnl  = self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
+
         elif file.lower().endswith(imagesList):
-            thumbnl = self.createIconImageFromBuffer(fullPathFile, self.viIconWxH)
+            thumbnl = self.createIconImageBuffer(fullPathFile, self.viIconWxH)
         else:
             thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
-            thumbnl  = self.createIconImageFromBuffer(thumbPth, self.systemIconImageWxH)
+            thumbnl  = self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
 
-        return thumbnl
+        # NOTE: Returning pixbuf through retreval to keep this file more universaly usable.
+        # We can just remove get_pixbuf to get a gtk image
+        return thumbnl.get_pixbuf()
 
-    def createIconImageFromBuffer(self, path, wxh):
+    def createIconImageBuffer(self, path, wxh):
+        pixbuf = None
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename  = path,
@@ -86,3 +91,7 @@ class Icon:
                 final_filename = icon_file.get_filename()
 
             return final_filename
+
+    def generateVideoThumbnail(self, fullPathFile, hashImgpth):
+        proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPathFile, "-o", hashImgpth])
+        proc.wait()

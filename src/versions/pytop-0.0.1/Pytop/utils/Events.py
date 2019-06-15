@@ -1,18 +1,9 @@
 
 # Gtk Imports
-import gi, threading
-gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
-
-from gi.repository import Gtk as gtk
-from gi.repository import Gdk as gdk
-
 
 # Python imports
 from .Grid     import Grid
 from .Dragging import Dragging
-
-from threading import Thread
 
 class Events:
     def __init__(self, settings):
@@ -32,14 +23,12 @@ class Events:
         selectedDirDialog.set_filename(self.desktopPath)
 
         self.grid = None
-        self.setDir(selectedDirDialog)
+        self.setIconViewDir(selectedDirDialog)
 
 
-    def setDir(self, widget, data=None):
+    def setIconViewDir(self, widget, data=None):
         newPath   = widget.get_filename()
-        self.grid = Grid(self.desktop, self.settings)
-        Thread(target=self.grid.generateDirectoryGrid, args=(newPath,)).start()
-        # Grid(self.desktop, self.settings).generateDirectoryGrid(newPath)
+        Grid(self.desktop, self.settings, newPath)
 
     def showGridControlMenu(self, widget, data=None):
         popover = self.builder.get_object("gridControlMenu")
@@ -70,6 +59,8 @@ class Events:
     def pasteFile(self):
         pass
 
+    def test(self, widget, data=None):
+        print(widget)
 
     # Webview events
     def showWebview(self, widget):
