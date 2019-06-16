@@ -20,6 +20,17 @@ iconview {
 
 treeview,
 treeview.view {
-    background: rgba(0, 0, 0, 0.64);
-    background-color: rgba(0, 0, 0, 0.64);
+    background: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+cell {
+    margin: 0em;
+    padding: 0em;
+    /* float: left; */
+}
+
+cell:focus {
+    outline-style: solid;
+    outline-color: rgba(0, 232, 255, 0.64);
 }

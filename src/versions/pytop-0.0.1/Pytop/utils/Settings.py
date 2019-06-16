@@ -44,6 +44,13 @@ class Settings:
         if visual != None and screen.is_composited():
             window.set_visual(visual)
 
+        # bind css file
+        cssProvider = gtk.CssProvider()
+        cssProvider.load_from_path('resources/stylesheet.css')
+        screen = gdk.Screen.get_default()
+        styleContext = gtk.StyleContext()
+        styleContext.add_provider_for_screen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
+
         window.set_app_paintable(True)
         window.connect("draw", self.area_draw)
         monitors = self.getMonitorData(screen)

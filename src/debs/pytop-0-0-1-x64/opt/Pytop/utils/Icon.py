@@ -64,7 +64,9 @@ class Icon:
                 print(e)
                 thumbnl  = gtk.Image(stock = gtk.STOCK_DIALOG_ERROR)
 
-        return thumbnl
+        # NOTE: Returning pixbuf through retreval to keep this file more universaly usable.
+        # We can just remove get_pixbuf to get a gtk image
+        return thumbnl.get_pixbuf()
 
     def createIconImageBuffer(self, path, wxh):
         pixbuf = None
@@ -73,6 +75,7 @@ class Icon:
             filename  = path,
             width     = wxh[0],
             height    = wxh[1],
+            # preserve_aspect_ratio = False)
             preserve_aspect_ratio = True)
             return gtk.Image.new_from_pixbuf(pixbuf)
         except Exception as e:

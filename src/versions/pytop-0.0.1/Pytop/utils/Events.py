@@ -1,5 +1,8 @@
 
 # Gtk Imports
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk as gtk
 
 # Python imports
 from .Grid     import Grid
@@ -25,18 +28,9 @@ class Events:
         self.grid = None
         self.setIconViewDir(selectedDirDialog)
 
-
     def setIconViewDir(self, widget, data=None):
         newPath   = widget.get_filename()
-        self.grid = Grid(self.desktop, self.settings, newPath)
-
-    def dirUp(self, widget, data=None):
-        newPath   = self.grid.returnParentDir()
-        self.grid = Grid(self.desktop, self.settings, newPath)
-
-    def iconLeftClickEventManager(self, widget, eve, item):
-        self.grid.iconLeftClickEventManager(widget, eve, item)
-
+        Grid(self.desktop, self.settings, newPath)
 
     def showGridControlMenu(self, widget, data=None):
         popover = self.builder.get_object("gridControlMenu")
