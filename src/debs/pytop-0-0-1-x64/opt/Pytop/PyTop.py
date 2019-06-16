@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Gtk Imports
-import gi
+import gi, faulthandler
 gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
 
@@ -15,6 +15,7 @@ from utils import Settings, Events
 gdk.threads_init()
 class Main:
     def __init__(self):
+        faulthandler.enable()
         webkit.WebView()  # Needed for glade file to load...
 
         self.builder     = gtk.Builder()
@@ -25,10 +26,6 @@ class Main:
         window = self.settings.createWindow()
         window.fullscreen()
         window.show_all()
-
-
-
-
 
 
 if __name__ == "__main__":

@@ -57,12 +57,14 @@ class Icon:
         elif file.lower().endswith(imagesList):
             thumbnl = self.createIconImageBuffer(fullPathFile, self.viIconWxH)
         else:
-            thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
-            thumbnl  = self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
+            try:
+                thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
+                thumbnl  = self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
+            except Exception as e:
+                print(e)
+                thumbnl  = gtk.Image(stock = gtk.STOCK_DIALOG_ERROR)
 
-        # NOTE: Returning pixbuf through retreval to keep this file more universaly usable.
-        # We can just remove get_pixbuf to get a gtk image
-        return thumbnl.get_pixbuf()
+        return thumbnl
 
     def createIconImageBuffer(self, path, wxh):
         pixbuf = None
@@ -76,7 +78,7 @@ class Icon:
         except Exception as e:
             print(e)
 
-        return gtk.Image()
+        return gtk.Image(stock = gtk.STOCK_DIALOG_ERROR)
 
     def getSystemThumbnail(self, filename,size):
         final_filename = ""

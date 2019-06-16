@@ -8,7 +8,7 @@ gi.require_version('Gdk', '3.0')
 from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
 from gi.repository import GdkPixbuf
-from gi.repository import GObject as gobject
+from gi.repository import GLib
 
 # Python imports
 import os, threading
@@ -17,8 +17,6 @@ from os import listdir
 from .Icon import Icon
 from .FileHandler import FileHandler
 
-
-gdk.threads_init()
 
 def threaded(fn):
     def wrapper(*args, **kwargs):
@@ -31,27 +29,42 @@ class Grid:
         self.settings     = settings
         self.filehandler  = FileHandler()
 
-        self.store        =  gtk.ListStore(GdkPixbuf.Pixbuf, str)
+        self.store        = gtk.TreeStore(str, GdkPixbuf.Pixbuf)
         self.usrHome      = settings.returnUserHome()
         self.builder      = self.settings.returnBuilder()
         self.ColumnSize   = self.settings.returnColumnSize()
         self.currentPath  = ""
         self.selectedFile = ""
-
+        self.treeViewCol  = None
         self.desktop.set_model(self.store)
-        self.desktop.set_pixbuf_column(0)
-        self.desktop.set_text_column(1)
-        self.desktop.connect("item-activated", self.iconLeftClickEventManager)
-        self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
+
+        if len(self.desktop.get_columns()) == 0:
+            self.treeViewCol  = gtk.TreeViewColumn("Files")
+            # Create a column cell to display text
+            colCellText = gtk.CellRendererText()
+            # Create a column cell to display an image
+            colCellImg = gtk.CellRendererPixbuf()
+            # Add the cells to the column
+            self.treeViewCol.pack_start(colCellImg, False)
+            self.treeViewCol.pack_start(colCellText, True)
+            # Bind the text cell to column 0 of the tree's model
+            self.treeViewCol.add_attribute(colCellText, "text", 0)
+            # Bind the image cell to column 1 of the tree's model
+            self.treeViewCol.add_attribute(colCellImg, "pixbuf", 1)
+            # Append the columns to the TreeView
+            self.desktop.append_column(self.treeViewCol)
+        else:
+            self.treeViewCol = self.desktop.get_column(0)
 
         self.setIconViewDir(newPath)
 
-    @threaded
+
     def setIconViewDir(self, path):
+        # self.treeViewCol.clear()
         self.store.clear()
 
         self.currentPath = path
-        dirPaths         = ['.', '..']
+        paths            = ['.', '..']
         files            = []
 
         for f in listdir(path):
@@ -62,42 +75,49 @@ class Grid:
             if isfile(file):
                 files.append(f)
             else:
-                dirPaths.append(f)
+                paths.append(f)
 
-        dirPaths.sort()
+        paths.sort()
         files.sort()
-        files = dirPaths + files
+        files = paths + files
         self.generateDirectoryGrid(path, files)
 
-    def generateDirectoryGrid(self, dirPath, files):
+    @threaded
+    def generateDirectoryGrid(self, path, files):
         fractionTick = 1.0 / 1.0 if len(files) == 0 else len(files)
         tickCount    = 0.0
-        row          = 0
-        col          = 0
-        x            = 0
-        y            = 0
 
         loadProgress = self.builder.get_object('loadProgress')
         loadProgress.set_text("Loading...")
         loadProgress.set_fraction(0.0)
-
         for file in files:
-            imgBuffer = Icon(self.settings).createIcon(dirPath, file)
-            gobject.idle_add(self.addToGrid, (imgBuffer, file,))
-            tickCount += fractionTick
+            imgBuffer = self.getImgBuffer(path, file)
+            GLib.idle_add(self.addToGrid, (imgBuffer, file,))
+            # tickCount += fractionTick
             loadProgress.set_fraction(tickCount)
-
         loadProgress.set_text("Finished...")
 
-    def addToGrid(self, args):
-        self.store.append([args[0], args[1]])
+    def getImgBuffer(self, path, file):
+        return Icon(self.settings).createIcon(path, file)
 
-    def iconLeftClickEventManager(self, widget, item):
+    def addToGrid(self, args, parent=None):
+        # NOTE: Converting to pixbuf after retreval to keep Icon.py more universal.
+        # We can just remove get_pixbuf to get a gtk image.
+        # We probably need a settings check to chose a set type...
+        self.store.append(parent, [args[1], args[0].get_pixbuf()])
+
+
+    def iconLeftClickEventManager(self, widget, eve, item):
+        tree_selection    = self.desktop.get_selection()
+        (model, pathlist) = tree_selection.get_selected_rows()
+        fileName          = None
+        dir               = self.currentPath
+        for path in pathlist :
+            tree_iter = model.get_iter(path)
+            fileName = model.get_value(tree_iter,0)
+
         try:
-            model    = widget.get_model()
-            fileName = model[item][1]
-            dir      = self.currentPath
-            file     = dir + "/" + fileName
+            file = dir + "/" + fileName
 
             if fileName == ".":
                 self.setIconViewDir(dir)
@@ -134,6 +154,9 @@ class Grid:
         except Exception as e:
             print(e)
 
+
+    def returnParentDir(self):
+        return os.path.abspath(os.path.join(self.currentPath, os.pardir))
 
     # Passthrough file control events
     def createFile(arg):

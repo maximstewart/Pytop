@@ -28,7 +28,15 @@ class Events:
 
     def setIconViewDir(self, widget, data=None):
         newPath   = widget.get_filename()
-        Grid(self.desktop, self.settings, newPath)
+        self.grid = Grid(self.desktop, self.settings, newPath)
+
+    def dirUp(self, widget, data=None):
+        newPath   = self.grid.returnParentDir()
+        self.grid = Grid(self.desktop, self.settings, newPath)
+
+    def iconLeftClickEventManager(self, widget, eve, item):
+        self.grid.iconLeftClickEventManager(widget, eve, item)
+
 
     def showGridControlMenu(self, widget, data=None):
         popover = self.builder.get_object("gridControlMenu")

@@ -7,7 +7,6 @@ Need python 3
 # TODO
 <ul>
 <li>Attach copy, cut, and paste signals to the controls menu.</li>
-<li>Add search functionality to the current directory.</li>
 <li>Add a settings file to store values.</li>
 <li>Improve icon detection for Steam.</li>
 </ul>

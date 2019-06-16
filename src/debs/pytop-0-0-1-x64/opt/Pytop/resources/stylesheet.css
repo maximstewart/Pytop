@@ -11,3 +11,15 @@ notebook > header {
     background-color: rgba(0, 0, 0, 0.24);
     border-color: rgba(0, 232, 255, 0.64);
 }
+
+box,
+iconview {
+    background-color: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+treeview,
+treeview.view {
+    background: rgba(0, 0, 0, 0.64);
+    background-color: rgba(0, 0, 0, 0.64);
+}
