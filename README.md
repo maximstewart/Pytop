@@ -8,5 +8,4 @@ Need python 3
 <ul>
 <li>Attach copy, cut, and paste signals to the controls menu.</li>
 <li>Add a settings file to store values.</li>
-<li>Improve icon detection for Steam.</li>
 </ul>
