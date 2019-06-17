@@ -1,8 +1,5 @@
 
 # Gtk Imports
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk as gtk
 
 # Python imports
 from .Grid     import Grid
@@ -32,10 +29,6 @@ class Events:
         newPath   = widget.get_filename()
         Grid(self.desktop, self.settings, newPath)
 
-    def showGridControlMenu(self, widget, data=None):
-        popover = self.builder.get_object("gridControlMenu")
-        popover.show_all()
-        popover.popup()
 
 
     # File control events
@@ -60,9 +53,6 @@ class Events:
 
     def pasteFile(self):
         pass
-
-    def test(self, widget, data=None):
-        print(widget)
 
     # Webview events
     def showWebview(self, widget):

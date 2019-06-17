@@ -7,8 +7,8 @@ gi.require_version('Gdk', '3.0')
 
 from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
+from gi.repository import GLib as glib
 from gi.repository import GdkPixbuf
-from gi.repository import GObject as gobject
 
 # Python imports
 import os, threading
@@ -17,8 +17,6 @@ from os import listdir
 from .Icon import Icon
 from .FileHandler import FileHandler
 
-
-gdk.threads_init()
 
 def threaded(fn):
     def wrapper(*args, **kwargs):
@@ -46,7 +44,6 @@ class Grid:
 
         self.setIconViewDir(newPath)
 
-    @threaded
     def setIconViewDir(self, path):
         self.store.clear()
 
@@ -69,25 +66,13 @@ class Grid:
         files = dirPaths + files
         self.generateDirectoryGrid(path, files)
 
+    @threaded
     def generateDirectoryGrid(self, dirPath, files):
-        fractionTick = 1.0 / 1.0 if len(files) == 0 else len(files)
-        tickCount    = 0.0
-        row          = 0
-        col          = 0
-        x            = 0
-        y            = 0
-
-        loadProgress = self.builder.get_object('loadProgress')
-        loadProgress.set_text("Loading...")
-        loadProgress.set_fraction(0.0)
-
         for file in files:
-            imgBuffer = Icon(self.settings).createIcon(dirPath, file)
-            gobject.idle_add(self.addToGrid, (imgBuffer, file,))
-            # tickCount += fractionTick
-            # loadProgress.set_fraction(tickCount)
-
-        loadProgress.set_text("Finished...")
+            image = Icon(self.settings).createIcon(dirPath, file)
+            # NOTE: Passing pixbuf after retreval to keep Icon.py file more universaly usable.
+            # We can just remove get_pixbuf to get a gtk image
+            glib.idle_add(self.addToGrid, (image.get_pixbuf(), file,))
 
     def addToGrid(self, args):
         self.store.append([args[0], args[1]])
@@ -116,6 +101,11 @@ class Grid:
     def iconRightClickEventManager(self, widget, eve, params):
         try:
             if eve.type == gdk.EventType.BUTTON_PRESS and eve.button == 3:
+                popover = self.builder.get_object("iconControlsWindow")
+                popover.show_all()
+                popover.popup()
+                print(popover)
+
                 # # NOTE: Need to change name of listview box...
                 # children = widget.get_children()[0].get_children()
                 # fileName = children[1].get_text()
@@ -123,14 +113,14 @@ class Grid:
                 # file     = dir + "/" + fileName
                 #
                 # input    = self.builder.get_object("iconRenameInput")
-                popover  = self.builder.get_object("iconControlsWindow")
+                # popover  = self.builder.get_object("iconControlsWindow")
                 # self.selectedFile = file # Used for return to caller
                 #
                 # input.set_text(fileName)
-                popover.set_relative_to(widget)
-                popover.set_position(gtk.PositionType.RIGHT)
-                popover.show_all()
-                popover.popup()
+                # popover.set_relative_to(widget)
+                # popover.set_position(gtk.PositionType.RIGHT)
+                # popover.show_all()
+                # popover.popup()
         except Exception as e:
             print(e)
 

@@ -29,61 +29,55 @@ class Icon:
         self.viIconWxH          = settings.returnVIIconWH()
 
     def createIcon(self, dir, file):
-        fullPathFile = dir + "/" + file
-        thumbnl      = self.getIconImage(file, fullPathFile)
+        fullPath = dir + "/" + file
+        thumbnl      = self.getIconImage(file, fullPath)
         return thumbnl
 
-    def getIconImage(self, file, fullPathFile):
+    def getIconImage(self, file, fullPath):
         thumbnl    = gtk.Image()
         vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
         imagesList = ('.png', '.jpg', '.jpeg', '.gif')
 
-        if file.lower().endswith(vidsList):
-            fileHash   = hashlib.sha256(str.encode(fullPathFile)).hexdigest()
-            hashImgpth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
+        try:
+            if file.lower().endswith(vidsList):
+                fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
+                hashImgpth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
 
-            # Generate any thumbnails beforehand...
-            try:
                 if isfile(hashImgpth) == False:
-                    self.generateVideoThumbnail(fullPathFile, hashImgpth)
-                    thumbnl = self.createIconImageBuffer(hashImgpth, self.viIconWxH)
-                else:
-                    thumbnl = self.createIconImageBuffer(hashImgpth, self.viIconWxH)
-            except Exception as e:
-                print(e)
-                thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
-                thumbnl  = self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
+                    self.generateVideoThumbnail(fullPath, hashImgpth)
 
-        elif file.lower().endswith(imagesList):
-            thumbnl = self.createIconImageBuffer(fullPathFile, self.viIconWxH)
-        else:
-            try:
-                thumbPth = self.getSystemThumbnail(fullPathFile, self.systemIconImageWxH[0])
-                thumbnl  = self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
-            except Exception as e:
-                print(e)
-                thumbnl  = gtk.Image(stock = gtk.STOCK_DIALOG_ERROR)
+                thumbnl = self.createIconImageBuffer(hashImgpth, self.viIconWxH)
+            elif file.lower().endswith(imagesList):
+                thumbnl = self.createIconImageBuffer(fullPath, self.viIconWxH)
+            else:
+                thumbnl = self.nonImageOrVideoIcon(fullPath)
+        except Exception as e:
+            return gtk.Image.new_from_file("resources/icons/bin.png")
 
-        # NOTE: Returning pixbuf through retreval to keep this file more universaly usable.
-        # We can just remove get_pixbuf to get a gtk image
-        return thumbnl.get_pixbuf()
+        if thumbnl == None: # If no system icon, try stock file icon...
+            thumbnl = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
+            if thumbnl == None:
+                thumbnl = gtk.Image.new_from_file("resources/icons/bin.png")
+
+        return thumbnl
+
+    def nonImageOrVideoIcon(self, fullPath):
+        thumbPth = self.getSystemThumbnail(fullPath, self.systemIconImageWxH[0])
+        return self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
 
     def createIconImageBuffer(self, path, wxh):
         pixbuf = None
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename  = path,
-            width     = wxh[0],
-            height    = wxh[1],
-            # preserve_aspect_ratio = False)
-            preserve_aspect_ratio = True)
+              filename  = path,
+              width     = wxh[0],
+              height    = wxh[1],
+              preserve_aspect_ratio = False)
             return gtk.Image.new_from_pixbuf(pixbuf)
         except Exception as e:
-            print(e)
+            return gtk.Image.new_from_file("resources/icons/bin.png")
 
-        return gtk.Image(stock = gtk.STOCK_DIALOG_ERROR)
-
-    def getSystemThumbnail(self, filename,size):
+    def getSystemThumbnail(self, filename, size):
         final_filename = ""
         if os.path.exists(filename):
             file = gio.File.new_for_path(filename)
@@ -97,6 +91,6 @@ class Icon:
 
             return final_filename
 
-    def generateVideoThumbnail(self, fullPathFile, hashImgpth):
-        proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPathFile, "-o", hashImgpth])
+    def generateVideoThumbnail(self, fullPath, hashImgpth):
+        proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPath, "-o", hashImgpth])
         proc.wait()
