@@ -42,6 +42,9 @@ class Grid:
         self.desktop.connect("item-activated", self.iconLeftClickEventManager)
         self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
 
+        self.vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
+        self.imagesList = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
+
         self.setIconViewDir(newPath)
 
     def setIconViewDir(self, path):
@@ -49,6 +52,9 @@ class Grid:
 
         self.currentPath = path
         dirPaths         = ['.', '..']
+        vids             = []
+        images           = []
+        desktop          = []
         files            = []
 
         for f in listdir(path):
@@ -57,13 +63,24 @@ class Grid:
                 if f.startswith('.'):
                     continue
             if isfile(file):
-                files.append(f)
+                if file.lower().endswith(self.vidsList):
+                    vids.append(f)
+                elif file.lower().endswith(self.imagesList):
+                    images.append(f)
+                elif file.lower().endswith((".desktop",)):
+                    desktop.append(f)
+                else:
+                    files.append(f)
             else:
                 dirPaths.append(f)
 
         dirPaths.sort()
+        vids.sort()
+        images.sort()
+        desktop.sort()
         files.sort()
-        files = dirPaths + files
+
+        files = dirPaths + vids + images + desktop + files
         self.generateDirectoryGrid(path, files)
 
     @threaded

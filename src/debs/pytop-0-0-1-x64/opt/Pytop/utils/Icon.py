@@ -11,7 +11,6 @@ from xdg.DesktopEntry import DesktopEntry
 
 # Python Imports
 import os, subprocess, hashlib, threading
-import urllib.request as urllib
 
 from os.path import isdir, isfile, join
 
@@ -32,9 +31,6 @@ class Icon:
         self.iconContainerWxH   = settings.returnContainerWH()
         self.systemIconImageWxH = settings.returnSystemIconImageWH()
         self.viIconWxH          = settings.returnVIIconWH()
-
-        user_agent   = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3'
-        self.headers = { 'User-Agent' : user_agent }
 
 
     def createIcon(self, dir, file):
@@ -101,32 +97,27 @@ class Icon:
 
             hashImgpth = steamIconsDir + fileHash + ".jpg"
             if isfile(hashImgpth) == True:
-                return self.createIconImageBuffer(hashImgpth, self.systemIconImageWxH)
+                # Use video sizes since headers are bigger
+                return self.createIconImageBuffer(hashImgpth, self.viIconWxH)
 
             execStr   = xdgObj.getExec()
             parts     = execStr.split("steam://rungameid/")
             id        = parts[len(parts) - 1]
 
-            url       = "https://steamdb.info/app/" + id + "/"
-            request   = urllib.Request(url, None, self.headers)
-            response  = urllib.urlopen(request)
-            page      = response.read().decode("utf8")
-            response.close() # its always safe to close an open connection
-            imageHTML = ""
-            imageLink = ""
+            # NOTE: Can try this logic instead...
+            # if command exists use it instead of header image
+            # if "steamcmd app_info_print id":
+            #     proc = subprocess.Popen(["steamcmd", "app_info_print", id])
+            #     proc.wait()
+            # else:
+            #     use the bottom logic
 
-            for line in page.split("\n"):
-                if "app-icon avatar" in line:
-                    imageHTML = line.strip()
-                    break
-
-            srcPart    = imageHTML.split()
-            srcPart    = srcPart[3].split("\"")
-            imageLink  = srcPart[1]
-            proc = subprocess.Popen(["wget", "-O", hashImgpth, imageLink])
+            imageLink = "https://steamcdn-a.akamaihd.net/steam/apps/" + id + "/header.jpg"
+            proc      = subprocess.Popen(["wget", "-O", hashImgpth, imageLink])
             proc.wait()
 
-            return self.createIconImageBuffer(hashImgpth, self.systemIconImageWxH)
+            # Use video sizes since headers are bigger
+            return self.createIconImageBuffer(hashImgpth, self.viIconWxH)
         elif os.path.exists(icon):
             return self.createIconImageBuffer(icon, self.systemIconImageWxH)
         else:
