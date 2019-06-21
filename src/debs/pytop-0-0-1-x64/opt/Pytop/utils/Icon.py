@@ -24,8 +24,9 @@ def threaded(fn):
 class Icon:
     def __init__(self, settings):
         self.settings          = settings
-        self.thubnailGen       = self.settings.getThumbnailGenerator()
-
+        self.thubnailGen       = settings.getThumbnailGenerator()
+        self.vidsList          = settings.returnVidsExtensionList()
+        self.imagesList        = settings.returnImagesExtensionList()
         self.GTK_ORIENTATION   = settings.returnIconImagePos()
         self.usrHome           = settings.returnUserHome()
         self.iconContainerWH   = settings.returnContainerWH()
@@ -41,11 +42,9 @@ class Icon:
     def getIconImage(self, file, fullPath):
         try:
             thumbnl    = None
-            vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
-            imagesList = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
 
             # Video thumbnail
-            if file.lower().endswith(vidsList):
+            if file.lower().endswith(self.vidsList):
                 fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
                 hashImgPth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
 
@@ -54,7 +53,7 @@ class Icon:
 
                 thumbnl  = self.createIconImageBuffer(hashImgPth, self.viIconWH)
             # Image Icon
-            elif file.lower().endswith(imagesList):
+            elif file.lower().endswith(self.imagesList):
                 thumbnl  = self.createIconImageBuffer(fullPath, self.viIconWH)
             # .desktop file parsing
             elif fullPath.lower().endswith( ('.desktop',) ):

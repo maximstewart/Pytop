@@ -12,19 +12,22 @@ class Settings:
         self.builder            = None
         self.hideHiddenFiles    = True
 
+
         self.GTK_ORIENTATION    = 1   # HORIZONTAL (0) VERTICAL (1)
         self.THUMB_GENERATOR    = "ffmpegthumbnailer"
         self.DEFAULTCOLOR       = gdk.RGBA(0.0, 0.0, 0.0, 0.0)   # ~#00000000
         self.MOUSEOVERCOLOR     = gdk.RGBA(0.0, 0.9, 1.0, 0.64)  # ~#00e8ff
         self.SELECTEDCOLOR      = gdk.RGBA(0.4, 0.5, 0.1, 0.84)
 
-        self.webHome            = 'http://webfm.com/'
+        self.ColumnSize         = 8
         self.usrHome            = os.path.expanduser('~')
         self.desktopPath        = self.usrHome + "/Desktop"
+        self.webHome            = 'http://webfm.com/'
         self.iconContainerWxH   = [128, 128]
         self.systemIconImageWxH = [72, 72]
         self.viIconWxH          = [256, 128]
-        self.ColumnSize         = 8
+        self.vidsExtensionList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
+        self.imagesExtensionList = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
 
 
     def attachBuilder(self, builder):
@@ -66,17 +69,19 @@ class Settings:
         return monitors
 
 
-    def returnBuilder(self):           return self.builder
-    def returnUserHome(self):          return self.usrHome
-    def returnDesktopPath(self):       return self.usrHome + "/Desktop"
-    def returnIconImagePos(self):      return self.GTK_ORIENTATION
-    def getThumbnailGenerator(self):   return self.THUMB_GENERATOR
-    def returnColumnSize(self):        return self.ColumnSize
-    def returnContainerWH(self):       return self.iconContainerWxH
-    def returnSystemIconImageWH(self): return self.systemIconImageWxH
-    def returnVIIconWH(self):          return self.viIconWxH
-    def returnWebHome(self):           return self.webHome
-    def isHideHiddenFiles(self):       return self.hideHiddenFiles
+    def returnBuilder(self):             return self.builder
+    def returnUserHome(self):            return self.usrHome
+    def returnDesktopPath(self):         return self.usrHome + "/Desktop"
+    def returnIconImagePos(self):        return self.GTK_ORIENTATION
+    def getThumbnailGenerator(self):     return self.THUMB_GENERATOR
+    def returnColumnSize(self):          return self.ColumnSize
+    def returnContainerWH(self):         return self.iconContainerWxH
+    def returnSystemIconImageWH(self):   return self.systemIconImageWxH
+    def returnVIIconWH(self):            return self.viIconWxH
+    def returnWebHome(self):             return self.webHome
+    def isHideHiddenFiles(self):         return self.hideHiddenFiles
+    def returnVidsExtensionList(self):   return self.vidsExtensionList
+    def returnImagesExtensionList(self): return self.imagesExtensionList
 
     def setDefaultWebviewSettings(self, widget, settings=None):
         # Usability

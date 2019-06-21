@@ -31,8 +31,8 @@ class Grid:
 
         self.store        =  gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.usrHome      = settings.returnUserHome()
-        self.builder      = self.settings.returnBuilder()
-        self.ColumnSize   = self.settings.returnColumnSize()
+        self.builder      = settings.returnBuilder()
+        self.ColumnSize   = settings.returnColumnSize()
         self.currentPath  = ""
         self.selectedFile = ""
 
@@ -43,15 +43,13 @@ class Grid:
         self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
         self.desktop.connect("selection-changed", self.setIconSelectionArray, (self.desktop,))
 
-        self.vidsList    = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
-        self.imagesList  = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
-        self.copyCutArry = []
-
-
+        self.vidsList     =  settings.returnVidsExtensionList()
+        self.imagesList   =  settings.returnImagesExtensionList()
         self.gtkLock      = False  # Thread checks for gtkLock
         self.threadLock   = False  # Gtk checks for thread lock
         self.helperThread = None   # Helper thread object
         self.toWorkPool   = []     # Thread fills pool and gtk empties it
+        self.copyCutArry  = []
 
         self.setIconViewDir(newPath)
 
