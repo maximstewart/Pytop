@@ -11,7 +11,7 @@ from gi.repository import GLib as glib
 from gi.repository import GdkPixbuf
 
 # Python imports
-import os, threading
+import os, threading, time
 from os.path import isdir, isfile, join
 from os import listdir
 from .Icon import Icon
@@ -48,9 +48,10 @@ class Grid:
         self.copyCutArry = []
 
 
-        self.gtkLock    = False  # Thread checks for gtkLock
-        self.threadLock = False  # Gtk checks for thread lock
-        self.toWorkPool = []     # Thread fills pool and gtk empties it
+        self.gtkLock      = False  # Thread checks for gtkLock
+        self.threadLock   = False  # Gtk checks for thread lock
+        self.helperThread = None   # Helper thread object
+        self.toWorkPool   = []     # Thread fills pool and gtk empties it
 
         self.setIconViewDir(newPath)
 
@@ -86,26 +87,30 @@ class Grid:
         images.sort()
         desktop.sort()
         files.sort()
-
         files = dirPaths + vids + images + desktop + files
-        self.generateDirectoryGrid(path, files) # Run helper thread...
+
+        if self.helperThread:
+            self.helperThread.terminate()
+            self.helperThread = None
+
+        # Run helper thread...
+        self.threadLock   = True
+        self.helperThread = threading.Thread(target=self.generateDirectoryGridIcon, args=(path, files)).start()
         glib.idle_add(self.addToGrid, (file,))  # This must stay in the main thread b/c
                                                 # gtk isn't thread safe/aware So, we
                                                 # make a sad lil thread hot potato 'game'
                                                 # out of this process.
 
 
-    @threaded
-    def generateDirectoryGrid(self, dirPath, files):
+    # @threaded
+    def generateDirectoryGridIcon(self, dirPath, files):
         # NOTE: We'll be passing pixbuf after retreval to keep Icon.py file more
         # universaly usable. We can just remove get_pixbuf to get a gtk.Image type
         for file in files:
             image = Icon(self.settings).createIcon(dirPath, file)
-
             self.toWorkPool.append([image.get_pixbuf(), file])
             self.threadLock = False
             self.gtkLock    = True
-            storageQue.clear()
 
 
     def addToGrid(self, args):
@@ -128,11 +133,13 @@ class Grid:
             self.toWorkPool.clear()
             self.gtkLock    = False
             self.threadLock = True
+            time.sleep(.005) # Fixes refresh and up icon not being added.
             return True
 
     def setIconSelectionArray(self, widget, data=None):
-        os.system('cls||clear')
-        print(data)
+        pass
+        # os.system('cls||clear')
+        # print(data)
 
     def iconLeftClickEventManager(self, widget, item):
         try:
@@ -190,14 +197,14 @@ class Grid:
 
         if status == 0:
             self.selectedFile = newName
-            self.generateDirectoryGrid(self.currentPath)
+            self.setIconViewDir(self.currentPath)
 
     def deleteFile(self):
         status = self.filehandler.deleteFile(self.selectedFile)
 
         if status == 0:
             self.selectedFile = ""
-            self.generateDirectoryGrid(self.currentPath)
+            self.setIconViewDir(self.currentPath)
 
     def copyFile(self):
         pass
