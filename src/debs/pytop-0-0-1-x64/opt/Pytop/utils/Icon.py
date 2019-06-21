@@ -23,127 +23,146 @@ def threaded(fn):
 
 class Icon:
     def __init__(self, settings):
-        self.settings           = settings
-        self.thubnailGen        = self.settings.getThumbnailGenerator()
+        self.settings          = settings
+        self.thubnailGen       = self.settings.getThumbnailGenerator()
 
-        self.GTK_ORIENTATION    = settings.returnIconImagePos()
-        self.usrHome            = settings.returnUserHome()
-        self.iconContainerWxH   = settings.returnContainerWH()
-        self.systemIconImageWxH = settings.returnSystemIconImageWH()
-        self.viIconWxH          = settings.returnVIIconWH()
+        self.GTK_ORIENTATION   = settings.returnIconImagePos()
+        self.usrHome           = settings.returnUserHome()
+        self.iconContainerWH   = settings.returnContainerWH()
+        self.systemIconImageWH = settings.returnSystemIconImageWH()
+        self.viIconWH          = settings.returnVIIconWH()
 
 
     def createIcon(self, dir, file):
         fullPath = dir + "/" + file
-        thumbnl      = self.getIconImage(file, fullPath)
-        return thumbnl
+        return self.getIconImage(file, fullPath)
+
 
     def getIconImage(self, file, fullPath):
-        thumbnl    = gtk.Image()
-        vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
-        imagesList = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
-
         try:
-            if file.lower().endswith(vidsList): # Video thumbnail
+            thumbnl    = None
+            vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
+            imagesList = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
+
+            # Video thumbnail
+            if file.lower().endswith(vidsList):
                 fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
-                hashImgpth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
+                hashImgPth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
 
-                if isfile(hashImgpth) == False:
-                    self.generateVideoThumbnail(fullPath, hashImgpth)
+                if isfile(hashImgPth) == False:
+                    self.generateVideoThumbnail(fullPath, hashImgPth)
 
-                thumbnl = self.createIconImageBuffer(hashImgpth, self.viIconWxH)
-            elif file.lower().endswith(imagesList):  # Image Icon
-                thumbnl = self.createIconImageBuffer(fullPath, self.viIconWxH)
-            else:  # System icons
-                thumbnl = self.nonImageOrVideoIcon(fullPath)
+                thumbnl  = self.createIconImageBuffer(hashImgPth, self.viIconWH)
+            # Image Icon
+            elif file.lower().endswith(imagesList):
+                thumbnl  = self.createIconImageBuffer(fullPath, self.viIconWH)
+            # .desktop file parsing
+            elif fullPath.lower().endswith( ('.desktop',) ):
+                thumbnl  = self.parseDesktopFiles(fullPath)
+            # System icons
+            else:
+                thumbnl  = self.getSystemThumbnail(fullPath, self.systemIconImageWH[0])
+
+            if thumbnl == None: # If no icon, try stock file icon...
+                thumbnl  = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
+
+            if thumbnl == None: # If no icon whatsoever, return internal default
+                thumbnl  = gtk.Image.new_from_file("resources/icons/bin.png")
+
+            return thumbnl
         except Exception as e:
             print(e)
             return gtk.Image.new_from_file("resources/icons/bin.png")
 
-        if thumbnl == None: # If no system icon, try stock file icon...
-            thumbnl = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
-            if thumbnl == None:
-                thumbnl = gtk.Image.new_from_file("resources/icons/bin.png")
 
-        return thumbnl
+    def parseDesktopFiles(self, fullPath):
+        try:
+            xdgObj      = DesktopEntry(fullPath)
+            icon        = xdgObj.getIcon()
+            iconsDirs   = "/usr/share/icons"
+            altIconPath = ""
 
-    def nonImageOrVideoIcon(self, fullPath):
-        if fullPath.lower().endswith( ('.desktop',) ):
-            return self.parseDesktopFiles(fullPath)
-        else:
-            thumbPth = self.getSystemThumbnail(fullPath, self.systemIconImageWxH[0])
-            return self.createIconImageBuffer(thumbPth, self.systemIconImageWxH)
+            if "steam" in icon:
+                steamIconsDir = self.usrHome + "/.thumbnails/steam_icons/"
+                name          = xdgObj.getName()
+                fileHash      = hashlib.sha256(str.encode(name)).hexdigest()
+
+                if isdir(steamIconsDir) == False:
+                    os.mkdir(steamIconsDir)
+
+                hashImgPth = steamIconsDir + fileHash + ".jpg"
+                if isfile(hashImgPth) == True:
+                    # Use video sizes since headers are bigger
+                    return self.createIconImageBuffer(hashImgPth, self.viIconWH)
+
+                execStr   = xdgObj.getExec()
+                parts     = execStr.split("steam://rungameid/")
+                id        = parts[len(parts) - 1]
+
+                # NOTE: Can try this logic instead...
+                # if command exists use it instead of header image
+                # if "steamcmd app_info_print id":
+                #     proc = subprocess.Popen(["steamcmd", "app_info_print", id])
+                #     proc.wait()
+                # else:
+                #     use the bottom logic
+
+                imageLink = "https://steamcdn-a.akamaihd.net/steam/apps/" + id + "/header.jpg"
+                proc      = subprocess.Popen(["wget", "-O", hashImgPth, imageLink])
+                proc.wait()
+
+                # Use video sizes since headers are bigger
+                return self.createIconImageBuffer(hashImgPth, self.viIconWH)
+            elif os.path.exists(icon):
+                return self.createIconImageBuffer(icon, self.systemIconImageWH)
+            else:
+                for (dirpath, dirnames, filenames) in os.walk(iconsDirs):
+                    for file in filenames:
+                        appNM = "application-x-" + icon
+                        if appNM in file:
+                            altIconPath = dirpath + "/" + file
+                            break
+
+                return self.createIconImageBuffer(altIconPath, self.systemIconImageWH)
+        except Exception as e:
+            print(e)
+            return None
+
+
+    def getSystemThumbnail(self, filename, size):
+        try:
+            iconPath = None
+            if os.path.exists(filename):
+                file      = gio.File.new_for_path(filename)
+                info      = file.query_info('standard::icon' , 0 , gio.Cancellable())
+                icon      = info.get_icon().get_names()[0]
+                iconTheme = gtk.IconTheme.get_default()
+                iconFile  = iconTheme.lookup_icon(icon , size , 0)
+
+                if iconFile != None:
+                    iconPath = iconFile.get_filename()
+                    return self.createIconImageBuffer(iconPath, self.systemIconImageWH)
+                else:
+                    return None
+            else:
+                return None
+        except Exception as e:
+            print(e)
+            return None
+
 
     def createIconImageBuffer(self, path, wxh):
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, wxh[0], wxh[1], False)
-            return gtk.Image.new_from_pixbuf(pixbuf)
         except Exception as e:
-            return gtk.Image.new_from_file("resources/icons/bin.png")
+            return None
 
-    def parseDesktopFiles(self, fullPath):
-        xdgObj      = DesktopEntry(fullPath)
-        icon        = xdgObj.getIcon()
-        iconsDirs   = "/usr/share/icons"
-        altIconPath = ""
+        return gtk.Image.new_from_pixbuf(pixbuf)
 
-        if "steam" in icon: # This whole thing is iffy at best but I want my damn icons!!
-            steamIconsDir = self.usrHome + "/.thumbnails/steam_icons/"
-            name          = xdgObj.getName()
-            fileHash      = hashlib.sha256(str.encode(name)).hexdigest()
 
-            if isdir(steamIconsDir) == False:
-                os.mkdir(steamIconsDir)
-
-            hashImgpth = steamIconsDir + fileHash + ".jpg"
-            if isfile(hashImgpth) == True:
-                # Use video sizes since headers are bigger
-                return self.createIconImageBuffer(hashImgpth, self.viIconWxH)
-
-            execStr   = xdgObj.getExec()
-            parts     = execStr.split("steam://rungameid/")
-            id        = parts[len(parts) - 1]
-
-            # NOTE: Can try this logic instead...
-            # if command exists use it instead of header image
-            # if "steamcmd app_info_print id":
-            #     proc = subprocess.Popen(["steamcmd", "app_info_print", id])
-            #     proc.wait()
-            # else:
-            #     use the bottom logic
-
-            imageLink = "https://steamcdn-a.akamaihd.net/steam/apps/" + id + "/header.jpg"
-            proc      = subprocess.Popen(["wget", "-O", hashImgpth, imageLink])
+    def generateVideoThumbnail(self, fullPath, hashImgPth):
+        try:
+            proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPath, "-o", hashImgPth])
             proc.wait()
-
-            # Use video sizes since headers are bigger
-            return self.createIconImageBuffer(hashImgpth, self.viIconWxH)
-        elif os.path.exists(icon):
-            return self.createIconImageBuffer(icon, self.systemIconImageWxH)
-        else:
-            for (dirpath, dirnames, filenames) in os.walk(iconsDirs):
-                for file in filenames:
-                    appNM = "application-x-" + icon
-                    if appNM in file:
-                        altIconPath = dirpath + "/" + file
-                        break
-
-            return self.createIconImageBuffer(altIconPath, self.systemIconImageWxH)
-
-    def getSystemThumbnail(self, filename, size):
-        final_filename = ""
-        if os.path.exists(filename):
-            file = gio.File.new_for_path(filename)
-            info = file.query_info('standard::icon' , 0 , gio.Cancellable())
-            icon = info.get_icon().get_names()[0]
-
-            icon_theme = gtk.IconTheme.get_default()
-            icon_file = icon_theme.lookup_icon(icon , size , 0)
-            if icon_file != None:
-                final_filename = icon_file.get_filename()
-
-            return final_filename
-
-    def generateVideoThumbnail(self, fullPath, hashImgpth):
-        proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPath, "-o", hashImgpth])
-        proc.wait()
+        except Exception as e:
+            print(e)

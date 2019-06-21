@@ -29,5 +29,8 @@ class Main:
 
 
 if __name__ == "__main__":
-    main = Main()
-    gtk.main()
+    try:
+        main = Main()
+        gtk.main()
+    except Exception as e:
+        print(e)

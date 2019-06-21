@@ -17,7 +17,6 @@
   </object>
   <object class="GtkWindow" id="Window">
     <property name="can_focus">False</property>
-    <property name="window_position">center</property>
     <property name="default_width">800</property>
     <property name="default_height">600</property>
     <property name="type_hint">desktop</property>
@@ -101,6 +100,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin">6</property>
+                    <property name="selection_mode">multiple</property>
+                    <property name="columns">6</property>
                   </object>
                 </child>
               </object>
@@ -115,10 +116,10 @@
       </object>
     </child>
   </object>
-  <object class="GtkPopoverMenu" id="iconControlsWindow">
+  <object class="GtkPopover" id="iconControlsWindow">
     <property name="can_focus">False</property>
-    <property name="relative_to">Desktop</property>
-    <property name="position">right</property>
+    <property name="relative_to">popOutBttn</property>
+    <property name="position">bottom</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -212,9 +213,6 @@
           </packing>
         </child>
       </object>
-      <packing>
-        <property name="submenu">main</property>
-      </packing>
     </child>
   </object>
   <object class="GtkPopover" id="webViewer">

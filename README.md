@@ -2,7 +2,7 @@
 Pytop is a Gtk + Python gui to have a custom desktop interface.
 
 # Notes
-```sudo apt-get install python3 steamcmd
+```sudo apt-get install python3 wget steamcmd```
 
 # TODO
 <ul>

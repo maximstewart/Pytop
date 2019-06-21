@@ -52,15 +52,8 @@ class Settings:
         styleContext.add_provider_for_screen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         window.set_app_paintable(True)
-        window.connect("draw", self.area_draw)
         monitors = self.getMonitorData(screen)
         window.resize(monitors[0].width, monitors[0].height)
-
-    def area_draw(self, widget, cr):
-        cr.set_source_rgba(0.0, 0.0, 0.0, 0.64)
-        cr.set_operator(cairo.OPERATOR_SOURCE)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
 
     def getMonitorData(self, screen):
         monitors = []

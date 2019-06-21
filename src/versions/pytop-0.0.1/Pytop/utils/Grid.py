@@ -41,9 +41,16 @@ class Grid:
         self.desktop.set_text_column(1)
         self.desktop.connect("item-activated", self.iconLeftClickEventManager)
         self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
+        self.desktop.connect("selection-changed", self.setIconSelectionArray, (self.desktop,))
 
-        self.vidsList   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
-        self.imagesList = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
+        self.vidsList    = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
+        self.imagesList  = ('.png', '.jpg', '.jpeg', '.gif', '.ico', '.tga')
+        self.copyCutArry = []
+
+
+        self.gtkLock    = False  # Thread checks for gtkLock
+        self.threadLock = False  # Gtk checks for thread lock
+        self.toWorkPool = []     # Thread fills pool and gtk empties it
 
         self.setIconViewDir(newPath)
 
@@ -81,18 +88,56 @@ class Grid:
         files.sort()
 
         files = dirPaths + vids + images + desktop + files
-        self.generateDirectoryGrid(path, files)
+        self.generateDirectoryGrid(path, files) # Run helper thread...
+        glib.idle_add(self.addToGrid, (file,))  # This must stay in the main thread b/c
+                                                # gtk isn't thread safe/aware So, we
+                                                # make a sad lil thread hot potato 'game'
+                                                # out of this process.
+
 
     @threaded
     def generateDirectoryGrid(self, dirPath, files):
+        # NOTE: We'll be passing pixbuf after retreval to keep Icon.py file more
+        # universaly usable. We can just remove get_pixbuf to get a gtk.Image type
+        storageQue = []
         for file in files:
             image = Icon(self.settings).createIcon(dirPath, file)
-            # NOTE: Passing pixbuf after retreval to keep Icon.py file more universaly usable.
-            # We can just remove get_pixbuf to get a gtk image
-            glib.idle_add(self.addToGrid, (image.get_pixbuf(), file,))
+
+            if len(storageQue) > 0:
+                for dataSet in storageQue:
+                    self.toWorkPool.append(dataSet)
+
+            self.toWorkPool.append([image.get_pixbuf(), file])
+            self.threadLock = False
+            self.gtkLock    = True
+            storageQue.clear()
+
 
     def addToGrid(self, args):
-        self.store.append([args[0], args[1]])
+        # NOTE: Returning true tells gtk to check again in the future when idle.
+        # False ends checks and "continues normal flow"
+        files = args[0]
+
+        if len(self.toWorkPool) > 0:
+            for dataSet in self.toWorkPool:
+                self.store.append(dataSet)
+
+        if len(self.store) == len(files): # Vonfirm processed all files and cleanup
+            self.gtkLock    = False
+            self.threadLock = False
+            self.toWorkPool.clear()
+            return False
+            # Check again when idle. If nothing else is updating
+            # this function gets called immediatly so we play hot potato
+        else:
+            self.toWorkPool.clear()
+            self.gtkLock    = False
+            self.threadLock = True
+            return True
+
+    def setIconSelectionArray(self, widget, data=None):
+        os.system('cls||clear')
+        print(data)
 
     def iconLeftClickEventManager(self, widget, item):
         try:
@@ -121,8 +166,6 @@ class Grid:
                 popover = self.builder.get_object("iconControlsWindow")
                 popover.show_all()
                 popover.popup()
-                print(popover)
-
                 # # NOTE: Need to change name of listview box...
                 # children = widget.get_children()[0].get_children()
                 # fileName = children[1].get_text()
