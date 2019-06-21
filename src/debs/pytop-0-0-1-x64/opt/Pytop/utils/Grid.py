@@ -99,13 +99,8 @@ class Grid:
     def generateDirectoryGrid(self, dirPath, files):
         # NOTE: We'll be passing pixbuf after retreval to keep Icon.py file more
         # universaly usable. We can just remove get_pixbuf to get a gtk.Image type
-        storageQue = []
         for file in files:
             image = Icon(self.settings).createIcon(dirPath, file)
-
-            if len(storageQue) > 0:
-                for dataSet in storageQue:
-                    self.toWorkPool.append(dataSet)
 
             self.toWorkPool.append([image.get_pixbuf(), file])
             self.threadLock = False
@@ -122,13 +117,13 @@ class Grid:
             for dataSet in self.toWorkPool:
                 self.store.append(dataSet)
 
-        if len(self.store) == len(files): # Vonfirm processed all files and cleanup
+        if len(self.store) == len(files): # Confirm processed all files and cleanup
             self.gtkLock    = False
             self.threadLock = False
             self.toWorkPool.clear()
             return False
-            # Check again when idle. If nothing else is updating
-            # this function gets called immediatly so we play hot potato
+            # Check again when idle; If nothing else is updating, this function
+            # gets called immediatly. So, we play hot potato by passing lock to Thread
         else:
             self.toWorkPool.clear()
             self.gtkLock    = False
