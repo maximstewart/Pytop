@@ -15,7 +15,7 @@ import os, threading, time
 from os.path import isdir, isfile, join
 from os import listdir
 from .Icon import Icon
-from .FileHandler import FileHandler
+from utils.FileHandler import FileHandler
 
 
 def threaded(fn):

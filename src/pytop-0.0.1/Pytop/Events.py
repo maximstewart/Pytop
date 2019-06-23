@@ -2,8 +2,9 @@
 # Gtk Imports
 
 # Python imports
-from .Grid     import Grid
-from .Dragging import Dragging
+from widgets import Grid
+from utils import Dragging
+
 
 class Events:
     def __init__(self, settings):
@@ -28,6 +29,19 @@ class Events:
     def setIconViewDir(self, widget, data=None):
         newPath   = widget.get_filename()
         Grid(self.desktop, self.settings, newPath)
+
+
+    def getWindowsOnScreen(self):
+        screen        = self.settings.returnScren()
+        windowButtons = self.builder.get_object("windowButtons")
+
+
+
+
+
+
+
+
 
 
 
