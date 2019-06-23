@@ -1,6 +1,4 @@
-
-
-# Gtk Imports
+# Gtk imports
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
@@ -14,6 +12,8 @@ from gi.repository import GdkPixbuf
 import os, threading, time
 from os.path import isdir, isfile, join
 from os import listdir
+
+# Application imports
 from .Icon import Icon
 from utils.FileHandler import FileHandler
 

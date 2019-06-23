@@ -1,5 +1,4 @@
-
-# Gtk Imports
+# Gtk imports
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
@@ -11,9 +10,9 @@ from xdg.DesktopEntry import DesktopEntry
 
 # Python Imports
 import os, subprocess, hashlib, threading
-
 from os.path import isdir, isfile, join
 
+# Application imports
 
 
 def threaded(fn):

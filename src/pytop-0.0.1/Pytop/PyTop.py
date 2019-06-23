@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Gtk Imports
+# Gtk imports
 import gi, faulthandler, signal
 gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
@@ -11,22 +11,25 @@ from gi.repository import WebKit2 as webkit
 from gi.repository import GLib
 
 # Python imports
-from utils import Settings
-from Events import Events
 
-gdk.threads_init()
+# Application imports
+from utils import Settings
+from Controller import Controller
+
+
 class Main:
     def __init__(self):
         faulthandler.enable()
         webkit.WebView()  # Needed for glade file to load...
 
-        self.builder     = gtk.Builder()
-        self.settings    = Settings()
-        self.settings.attachBuilder(self.builder)
-        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
-        self.builder.connect_signals(Events(self.settings))
+        builder  = gtk.Builder()
+        settings = Settings()
+        settings.attachBuilder(builder)
+        builder.connect_signals(Controller(settings))
 
-        window = self.settings.createWindow()
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
+
+        window = settings.createWindow()
         window.fullscreen()
         window.show_all()
 

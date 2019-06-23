@@ -1,5 +1,9 @@
+# Gtk imports
 
+# Python imports
 import os, shutil, subprocess, threading
+
+# Application imports
 
 
 def threaded(fn):

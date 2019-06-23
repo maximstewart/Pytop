@@ -1,12 +1,13 @@
-
-# Gtk Imports
+# Gtk imports
 
 # Python imports
+
+# Application imports
 from widgets import Grid
 from utils import Dragging
 
 
-class Events:
+class Controller:
     def __init__(self, settings):
         self.settings     = settings
         self.builder      = self.settings.returnBuilder()

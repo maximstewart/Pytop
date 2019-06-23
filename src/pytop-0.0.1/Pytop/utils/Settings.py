@@ -1,11 +1,16 @@
-
-# Gtk Imports
-import gi, cairo, os
+# Gtk imports
+import gi, cairo
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
 from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
+
+# Python imports
+import os
+
+# Application imports
+
 
 class Settings:
     def __init__(self):
