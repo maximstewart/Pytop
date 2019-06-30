@@ -31,19 +31,13 @@ class Controller:
         newPath   = widget.get_filename()
         Grid(self.desktop, self.settings, newPath)
 
-
     def getWindowsOnScreen(self):
         screen        = self.settings.returnScren()
         windowButtons = self.builder.get_object("windowButtons")
 
 
-
-
-
-
-
-
-
+    def closePopup(self, widget, data=None):
+        widget.hide()
 
 
     # File control events
@@ -68,6 +62,7 @@ class Controller:
 
     def pasteFile(self):
         pass
+
 
     # Webview events
     def showWebview(self, widget):

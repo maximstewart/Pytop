@@ -140,6 +140,7 @@ class Grid:
         # print(data)
 
     def iconLeftClickEventManager(self, widget, item):
+        print(item)
         try:
             model    = widget.get_model()
             fileName = model[item][1]
@@ -160,27 +161,33 @@ class Grid:
         except Exception as e:
             print(e)
 
-    def iconRightClickEventManager(self, widget, eve, params):
+    def iconRightClickEventManager(self, widget, eve, rclicked_icon):
         try:
             if eve.type == gdk.EventType.BUTTON_PRESS and eve.button == 3:
-                popover = self.builder.get_object("iconControlsWindow")
-                popover.show_all()
-                popover.popup()
-                # # NOTE: Need to change name of listview box...
-                # children = widget.get_children()[0].get_children()
-                # fileName = children[1].get_text()
-                # dir      = self.currentPath
-                # file     = dir + "/" + fileName
-                #
-                # input    = self.builder.get_object("iconRenameInput")
-                # popover  = self.builder.get_object("iconControlsWindow")
-                # self.selectedFile = file # Used for return to caller
-                #
-                # input.set_text(fileName)
-                # popover.set_relative_to(widget)
-                # popover.set_position(gtk.PositionType.RIGHT)
-                # popover.show_all()
-                # popover.popup()
+                input    = self.builder.get_object("iconRenameInput")
+                controls = self.builder.get_object("iconControlsWindow")
+                items    = widget.get_selected_items()
+                model    = widget.get_model()
+
+                if len(items) == 1:
+                    fileName = model[items[0]][1]
+                    dir      = self.currentPath
+                    file     = dir + "/" + fileName
+
+                    self.selectedFile = file # Used for return to caller
+                    input.set_text(fileName)
+                    controls.show_all()
+                if len(items) > 1:
+                    dir      = self.currentPath
+                    for item in items:
+                        fileName = model[item][1]
+                        file     = dir + "/" + fileName
+                        print(file)
+
+                    input.set_text("")
+                    input.hide()
+                    controls.show()
+
         except Exception as e:
             print(e)
 
