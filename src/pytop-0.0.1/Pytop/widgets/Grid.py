@@ -49,8 +49,6 @@ class Grid:
         self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
 
 
-
-
     def setIconViewDir(self, path):
         self.store.clear()
 

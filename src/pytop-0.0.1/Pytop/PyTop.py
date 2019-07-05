@@ -15,8 +15,7 @@ import inspect
 
 # Application imports
 from utils import Settings
-from signal_classes import WebviewSignals
-from Controller import Controller
+from signal_classes import CrossClassSignals, WebviewSignals, GridSignals
 
 
 class Main:
@@ -31,7 +30,10 @@ class Main:
 
         # Gets the methods from the classes and sets to handler.
         # Then, builder connects to any signals it needs.
-        classes  = [WebviewSignals(settings), Controller(settings)]
+        classes  = [CrossClassSignals(settings),
+                    WebviewSignals(settings),
+                    GridSignals(settings)]
+
         handlers = {}
         for c in classes:
             methods = inspect.getmembers(c, predicate=inspect.ismethod)

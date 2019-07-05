@@ -8,19 +8,20 @@ from utils import Dragging
 from utils import FileHandler
 
 
-class Controller:
+class GridSignals:
     def __init__(self, settings):
         self.filehandler  = FileHandler()
         self.settings     = settings
+
         self.builder      = self.settings.returnBuilder()
         self.desktop      = self.builder.get_object("Desktop")
+        selectedDirDialog = self.builder.get_object("selectedDirDialog")
+        filefilter        = self.builder.get_object("Folders")
 
         self.desktopPath  = self.settings.returnDesktopPath()
         self.grid         = None
 
         # Add filter to allow only folders to be selected
-        selectedDirDialog = self.builder.get_object("selectedDirDialog")
-        filefilter        = self.builder.get_object("Folders")
         selectedDirDialog.add_filter(filefilter)
         selectedDirDialog.set_filename(self.desktopPath)
 
@@ -30,15 +31,6 @@ class Controller:
         newPath   = widget.get_filename()
         self.grid = Grid(self.desktop, self.settings)
         self.grid.setIconViewDir(newPath)
-
-    def getWindowsOnScreen(self):
-        screen        = self.settings.returnScren()
-        windowButtons = self.builder.get_object("windowButtons")
-
-
-    def closePopup(self, widget, data=None):
-        widget.hide()
-
 
 
     # File control events
