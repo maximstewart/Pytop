@@ -56,6 +56,15 @@ class GridSignals:
                     self.grid.setIconViewDir(self.currentPath)
 
 
+    def trashFiles(self, widget):
+        self.getGridInfo()
+        status = self.filehandler.moveToTrash(self.selectedFiles)
+
+        if status == 0:
+            self.selectedFiles = []
+            self.grid.setIconViewDir(self.currentPath)
+
+
     def deleteFiles(self, widget):
         self.getGridInfo()
         status = self.filehandler.deleteFiles(self.selectedFiles)

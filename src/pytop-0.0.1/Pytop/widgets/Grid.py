@@ -46,7 +46,7 @@ class Grid:
         self.desktop.set_pixbuf_column(0)
         self.desktop.set_text_column(1)
         self.desktop.connect("item-activated", self.iconDblLeftClick)
-        self.desktop.connect("button_press_event", self.iconClickRight, (self.desktop,))
+        self.desktop.connect("button_press_event", self.iconRightClick, (self.desktop,))
 
 
     def setIconViewDir(self, path):
@@ -151,7 +151,7 @@ class Grid:
         except Exception as e:
             print(e)
 
-    def iconClickRight(self, widget, eve, rclicked_icon):
+    def iconRightClick(self, widget, eve, rclicked_icon):
         try:
             if eve.type == gdk.EventType.BUTTON_PRESS and eve.button == 3:
                 input    = self.builder.get_object("iconRenameInput")

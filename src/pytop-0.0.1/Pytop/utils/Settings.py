@@ -110,7 +110,6 @@ class Settings:
     def returnSystemIconImageWH(self):   return self.systemIconImageWxH
     def returnVIIconWH(self):            return self.viIconWxH
     def isHideHiddenFiles(self):         return self.hideHiddenFiles
-    def returnImagesExtensionList(self): return self.imagesExtensionList
 
     # Filter returns
     def returnOfficeFilter(self):        return self.office

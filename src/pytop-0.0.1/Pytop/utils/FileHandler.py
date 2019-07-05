@@ -69,13 +69,32 @@ class FileHandler:
             print(e)
             return 1
 
-    def moveToTrash(arg):
+    def dedupPathIter(self, toBeTrashPath):
+        i             = 0
+        duplicateFix  = ""
+
+        if os.path.exists(toBeTrashPath):
+            while os.path.exists(toBeTrashPath + duplicateFix) == True:
+                i+=1
+                duplicateFix = "-" + str(i)
+
+        return duplicateFix
+
+
+    def moveToTrash(self, toTrashFiles):
         try:
             print("Moving to Trash...")
-            for file in toDeleteFiles:
+            for file in toTrashFiles:
                 print(file)
                 if os.path.exists(file):
-                    shutil.move(file, self.TRASHFILESFOLDER)
+                    parts         = file.split("/")
+                    toBeTrashPath = self.TRASHFILESFOLDER + parts[len(parts) - 1]
+                    finalForm     = file + self.dedupPathIter(toBeTrashPath)
+
+                    if finalForm != file:
+                        os.rename(file, finalForm)
+
+                    shutil.move(finalForm, self.TRASHFILESFOLDER)
                 else:
                     print("The folder/file does not exist")
                     return 1
