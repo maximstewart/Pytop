@@ -11,24 +11,33 @@ from gi.repository import WebKit2 as webkit
 from gi.repository import GLib
 
 # Python imports
+import inspect
 
 # Application imports
 from utils import Settings
+from signal_classes import WebviewSignals
 from Controller import Controller
 
 
 class Main:
     def __init__(self):
-        faulthandler.enable()
-        webkit.WebView()  # Needed for glade file to load...
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
+        faulthandler.enable()  # For better debug info
+        webkit.WebView()       # Need one initialized for webview to work from glade file
 
         builder  = gtk.Builder()
         settings = Settings()
         settings.attachBuilder(builder)
-        builder.connect_signals(Controller(settings))
 
-        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
+        # Gets the methods from the classes and sets to handler.
+        # Then, builder connects to any signals it needs.
+        classes  = [WebviewSignals(settings), Controller(settings)]
+        handlers = {}
+        for c in classes:
+            methods = inspect.getmembers(c, predicate=inspect.ismethod)
+            handlers.update(methods)
 
+        builder.connect_signals(handlers)
         window = settings.createWindow()
         window.fullscreen()
         window.show_all()

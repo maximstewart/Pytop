@@ -5,18 +5,18 @@
 # Application imports
 from widgets import Grid
 from utils import Dragging
+from utils import FileHandler
 
 
 class Controller:
     def __init__(self, settings):
+        self.filehandler  = FileHandler()
         self.settings     = settings
         self.builder      = self.settings.returnBuilder()
         self.desktop      = self.builder.get_object("Desktop")
-        self.webview      = self.builder.get_object("webview")
-        self.desktopPath  = self.settings.returnDesktopPath()
 
-        self.settings.setDefaultWebviewSettings(self.webview, self.webview.get_settings())
-        self.webview.load_uri(self.settings.returnWebHome())
+        self.desktopPath  = self.settings.returnDesktopPath()
+        self.grid         = None
 
         # Add filter to allow only folders to be selected
         selectedDirDialog = self.builder.get_object("selectedDirDialog")
@@ -24,12 +24,12 @@ class Controller:
         selectedDirDialog.add_filter(filefilter)
         selectedDirDialog.set_filename(self.desktopPath)
 
-        self.grid = None
         self.setIconViewDir(selectedDirDialog)
 
     def setIconViewDir(self, widget, data=None):
         newPath   = widget.get_filename()
-        Grid(self.desktop, self.settings, newPath)
+        self.grid = Grid(self.desktop, self.settings)
+        self.grid.setIconViewDir(newPath)
 
     def getWindowsOnScreen(self):
         screen        = self.settings.returnScren()
@@ -40,19 +40,31 @@ class Controller:
         widget.hide()
 
 
+
     # File control events
-    def createFile(self):
+    def createFile(arg):
         pass
 
-    def updateFile(self, widget, data=None):
-        newName = widget.get_text().strip()
-        if data and data.keyval == 65293:    # Enter key event
-            self.grid.updateFile(newName)
-        elif data == None:                   # Save button 'event'
-            self.grid.updateFile(newName)
+    def updateFile(self, file):
+        if len(self.selectedFiles) == 1:
+            newName = self.currentPath + "/" + file
+            status  = self.filehandler.updateFile(self.selectedFiles[0], newName)
 
-    def deleteFile(self, widget, data=None):
-        self.grid.deleteFile()
+            if status == 0:
+                self.selectedFiles = [newName]
+                self.setIconViewDir(self.currentPath)
+
+
+    def deleteFiles(self):
+        if len(self.selectedFiles) == 1:
+            status = self.filehandler.deleteFile(self.selectedFiles[0])
+
+            if status == 0:
+                self.selectedFiles = []
+                self.setIconViewDir(self.currentPath)
+        elif len(self.selectedFiles) > 1:
+            pass
+
 
     def copyFile(self):
         pass
@@ -62,21 +74,3 @@ class Controller:
 
     def pasteFile(self):
         pass
-
-
-    # Webview events
-    def showWebview(self, widget):
-        self.builder.get_object("webViewer").popup()
-
-    def loadHome(self, widget):
-        self.webview.load_uri(self.settings.returnWebHome())
-
-    def runSearchWebview(self, widget, data=None):
-        if data.keyval == 65293:
-            self.webview.load_uri(widget.get_text().strip())
-
-    def refreshPage(self, widget, data=None):
-        self.webview.load_uri(self.webview.get_uri())
-
-    def setUrlBar(self, widget, data=None):
-        self.builder.get_object("webviewSearch").set_text(widget.get_uri())

@@ -24,34 +24,32 @@ def threaded(fn):
     return wrapper
 
 class Grid:
-    def __init__(self, desktop, settings, newPath):
-        self.desktop      = desktop
-        self.settings     = settings
-        self.filehandler  = FileHandler()
+    def __init__(self, desktop, settings):
+        self.desktop       = desktop
+        self.settings      = settings
 
-        self.store        =  gtk.ListStore(GdkPixbuf.Pixbuf, str)
-        self.usrHome      = settings.returnUserHome()
-        self.builder      = settings.returnBuilder()
-        self.ColumnSize   = settings.returnColumnSize()
-        self.currentPath  = ""
-        self.selectedFile = ""
+        self.store         = gtk.ListStore(GdkPixbuf.Pixbuf, str)
+        self.usrHome       = settings.returnUserHome()
+        self.builder       = settings.returnBuilder()
+        self.ColumnSize    = settings.returnColumnSize()
+        self.vidsList      = settings.returnVidsExtensionList()
+        self.imagesList    = settings.returnImagesExtensionList()
+        self.gtkLock       = False  # Thread checks for gtkLock
+        self.threadLock    = False  # Gtk checks for thread lock
+        self.helperThread  = None   # Helper thread object
+        self.toWorkPool    = []     # Thread fills pool and gtk empties it
+        self.copyCutArry   = []
+        self.selectedFiles = []
+        self.currentPath   = ""
 
         self.desktop.set_model(self.store)
         self.desktop.set_pixbuf_column(0)
         self.desktop.set_text_column(1)
         self.desktop.connect("item-activated", self.iconLeftClickEventManager)
         self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
-        self.desktop.connect("selection-changed", self.setIconSelectionArray, (self.desktop,))
 
-        self.vidsList     =  settings.returnVidsExtensionList()
-        self.imagesList   =  settings.returnImagesExtensionList()
-        self.gtkLock      = False  # Thread checks for gtkLock
-        self.threadLock   = False  # Gtk checks for thread lock
-        self.helperThread = None   # Helper thread object
-        self.toWorkPool   = []     # Thread fills pool and gtk empties it
-        self.copyCutArry  = []
 
-        self.setIconViewDir(newPath)
+
 
     def setIconViewDir(self, path):
         self.store.clear()
@@ -126,7 +124,7 @@ class Grid:
             self.toWorkPool.clear()
             return False
             # Check again when idle; If nothing else is updating, this function
-            # gets called immediatly. So, we play hot potato by passing lock to Thread
+            # gets called immediatly. So, we play hot potato by setting lock to Thread
         else:
             self.toWorkPool.clear()
             self.gtkLock    = False
@@ -134,13 +132,7 @@ class Grid:
             time.sleep(.005) # Fixes refresh and up icon not being added.
             return True
 
-    def setIconSelectionArray(self, widget, data=None):
-        pass
-        # os.system('cls||clear')
-        # print(data)
-
     def iconLeftClickEventManager(self, widget, item):
-        print(item)
         try:
             model    = widget.get_model()
             fileName = model[item][1]
@@ -157,7 +149,7 @@ class Grid:
                 self.currentPath = file
                 self.setIconViewDir(self.currentPath)
             elif isfile(file):
-                self.filehandler.openFile(file)
+                FileHandler().openFile(file)
         except Exception as e:
             print(e)
 
@@ -168,20 +160,22 @@ class Grid:
                 controls = self.builder.get_object("iconControlsWindow")
                 items    = widget.get_selected_items()
                 model    = widget.get_model()
+                self.selectedFiles = []
 
                 if len(items) == 1:
                     fileName = model[items[0]][1]
                     dir      = self.currentPath
                     file     = dir + "/" + fileName
 
-                    self.selectedFile = file # Used for return to caller
+                    self.selectedFiles.append(file)     # Used for return to caller
                     input.set_text(fileName)
                     controls.show_all()
-                if len(items) > 1:
-                    dir      = self.currentPath
+                elif len(items) > 1:
+                    dir = self.currentPath
                     for item in items:
                         fileName = model[item][1]
                         file     = dir + "/" + fileName
+                        self.selectedFiles.append(file) # Used for return to caller
                         print(file)
 
                     input.set_text("")
@@ -190,32 +184,3 @@ class Grid:
 
         except Exception as e:
             print(e)
-
-
-    # Passthrough file control events
-    def createFile(arg):
-        pass
-
-    def updateFile(self, file):
-        newName = self.currentPath + "/" + file
-        status  = self.filehandler.updateFile(self.selectedFile, newName)
-
-        if status == 0:
-            self.selectedFile = newName
-            self.setIconViewDir(self.currentPath)
-
-    def deleteFile(self):
-        status = self.filehandler.deleteFile(self.selectedFile)
-
-        if status == 0:
-            self.selectedFile = ""
-            self.setIconViewDir(self.currentPath)
-
-    def copyFile(self):
-        pass
-
-    def cutFile(self):
-        pass
-
-    def pasteFile(self):
-        pass
