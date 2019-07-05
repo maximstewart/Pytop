@@ -24,8 +24,8 @@ class Icon:
     def __init__(self, settings):
         self.settings          = settings
         self.thubnailGen       = settings.getThumbnailGenerator()
-        self.vidsList          = settings.returnVidsExtensionList()
-        self.imagesList        = settings.returnImagesExtensionList()
+        self.vidsList          = settings.returnVidsFilter()
+        self.imagesList        = settings.returnImagesFilter()
         self.GTK_ORIENTATION   = settings.returnIconImagePos()
         self.usrHome           = settings.returnUserHome()
         self.iconContainerWH   = settings.returnContainerWH()

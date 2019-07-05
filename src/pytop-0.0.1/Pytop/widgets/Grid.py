@@ -27,26 +27,26 @@ class Grid:
     def __init__(self, desktop, settings):
         self.desktop       = desktop
         self.settings      = settings
+        self.fileHandler   = FileHandler(self.settings)
 
         self.store         = gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.usrHome       = settings.returnUserHome()
         self.builder       = settings.returnBuilder()
         self.ColumnSize    = settings.returnColumnSize()
-        self.vidsList      = settings.returnVidsExtensionList()
-        self.imagesList    = settings.returnImagesExtensionList()
+        self.vidsList      = settings.returnVidsFilter()
+        self.imagesList    = settings.returnImagesFilter()
         self.gtkLock       = False  # Thread checks for gtkLock
         self.threadLock    = False  # Gtk checks for thread lock
         self.helperThread  = None   # Helper thread object
         self.toWorkPool    = []     # Thread fills pool and gtk empties it
-        self.copyCutArry   = []
-        self.selectedFiles = []
+        self.SelectedFiles = []
         self.currentPath   = ""
 
         self.desktop.set_model(self.store)
         self.desktop.set_pixbuf_column(0)
         self.desktop.set_text_column(1)
-        self.desktop.connect("item-activated", self.iconLeftClickEventManager)
-        self.desktop.connect("button_press_event", self.iconRightClickEventManager, (self.desktop,))
+        self.desktop.connect("item-activated", self.iconDblLeftClick)
+        self.desktop.connect("button_press_event", self.iconClickRight, (self.desktop,))
 
 
     def setIconViewDir(self, path):
@@ -130,7 +130,7 @@ class Grid:
             time.sleep(.005) # Fixes refresh and up icon not being added.
             return True
 
-    def iconLeftClickEventManager(self, widget, item):
+    def iconDblLeftClick(self, widget, item):
         try:
             model    = widget.get_model()
             fileName = model[item][1]
@@ -147,25 +147,25 @@ class Grid:
                 self.currentPath = file
                 self.setIconViewDir(self.currentPath)
             elif isfile(file):
-                FileHandler().openFile(file)
+                self.fileHandler.openFile(file)
         except Exception as e:
             print(e)
 
-    def iconRightClickEventManager(self, widget, eve, rclicked_icon):
+    def iconClickRight(self, widget, eve, rclicked_icon):
         try:
             if eve.type == gdk.EventType.BUTTON_PRESS and eve.button == 3:
                 input    = self.builder.get_object("iconRenameInput")
                 controls = self.builder.get_object("iconControlsWindow")
                 items    = widget.get_selected_items()
                 model    = widget.get_model()
-                self.selectedFiles = []
+                self.SelectedFiles.clear()
 
                 if len(items) == 1:
                     fileName = model[items[0]][1]
                     dir      = self.currentPath
                     file     = dir + "/" + fileName
 
-                    self.selectedFiles.append(file)     # Used for return to caller
+                    self.SelectedFiles.append(file)     # Used for return to caller
                     input.set_text(fileName)
                     controls.show_all()
                 elif len(items) > 1:
@@ -173,8 +173,7 @@ class Grid:
                     for item in items:
                         fileName = model[item][1]
                         file     = dir + "/" + fileName
-                        self.selectedFiles.append(file) # Used for return to caller
-                        print(file)
+                        self.SelectedFiles.append(file) # Used for return to caller
 
                     input.set_text("")
                     input.hide()
@@ -182,3 +181,9 @@ class Grid:
 
         except Exception as e:
             print(e)
+
+    def returnSelectedFiles(self):
+        return self.SelectedFiles
+
+    def returnCurrentPath(self):
+        return self.currentPath

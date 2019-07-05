@@ -12,25 +12,29 @@ def threaded(fn):
     return wrapper
 
 class FileHandler:
-    def __init__(self):
+    def __init__(self, settings):
         # 'Filters'
-        self.office = ('.doc', '.docx', '.xls', '.xlsx', '.xlt', '.xltx' '.xlm', '.ppt', 'pptx', '.pps', '.ppsx', '.odt', '.rtf')
-        self.vids   = ('.mkv', '.avi', '.flv', '.mov', '.m4v', '.mpg', '.wmv', '.mpeg', '.mp4', '.webm')
-        self.txt    = ('.txt', '.text', '.sh', '.cfg', '.conf')
-        self.music  = ('.psf', '.mp3', '.ogg' , '.flac')
-        self.images = ('.png', '.jpg', '.jpeg', '.gif')
-        self.pdf    = ('.pdf')
+        self.office = settings.returnOfficeFilter()
+        self.vids   = settings.returnVidsFilter()
+        self.txt    = settings.returnTextFilter()
+        self.music  = settings.returnMusicFilter()
+        self.images = settings.returnImagesFilter()
+        self.pdf    = settings.returnPdfFilter()
 
         # Args
-        self.MEDIAPLAYER  = "mpv";
-        self.IMGVIEWER    = "mirage";
-        self.MUSICPLAYER  = "/opt/deadbeef/bin/deadbeef";
-        self.OFFICEPROG   = "libreoffice";
-        self.TEXTVIEWER   = "leafpad";
-        self.PDFVIEWER    = "evince";
-        self.FILEMANAGER  = "spacefm";
-        self.MPLAYER_WH   = " -xy 1600 -geometry 50%:50% ";
-        self.MPV_WH       = " -geometry 50%:50% ";
+        self.MEDIAPLAYER  = settings.returnMediaProg()
+        self.IMGVIEWER    = settings.returnImgVwrProg()
+        self.MUSICPLAYER  = settings.returnMusicProg()
+        self.OFFICEPROG   = settings.returnOfficeProg()
+        self.TEXTVIEWER   = settings.returnTextProg()
+        self.PDFVIEWER    = settings.returnPdfProg()
+        self.FILEMANAGER  = settings.returnFileMngrProg()
+        self.MPLAYER_WH   = settings.returnMplyrWH()
+        self.MPV_WH       = settings.returnMpvWHProg()
+        self.TRASHFILESFOLDER = settings.returnTrshFilesPth()
+        self.TRASHINFOFOLDER  = settings.returnTrshInfoPth()
+
+
 
     @threaded
     def openFile(self, file):
@@ -65,21 +69,39 @@ class FileHandler:
             print(e)
             return 1
 
-    def deleteFile(self, toDeleteFile):
+    def moveToTrash(arg):
+        try:
+            print("Moving to Trash...")
+            for file in toDeleteFiles:
+                print(file)
+                if os.path.exists(file):
+                    shutil.move(file, self.TRASHFILESFOLDER)
+                else:
+                    print("The folder/file does not exist")
+                    return 1
+        except Exception as e:
+            print("An error occured moving the file to trash:")
+            print(e)
+            return 1
+
+        return 0
+
+    def deleteFiles(self, toDeleteFiles):
         try:
             print("Deleting...")
-            print(toDeleteFile)
-            if os.path.exists(toDeleteFile):
-                if os.path.isfile(toDeleteFile):
-                    os.remove(toDeleteFile)
-                elif os.path.isdir(toDeleteFile):
-                    shutil.rmtree(toDeleteFile)
+            for file in toDeleteFiles:
+                print(file)
+                if os.path.exists(file):
+                    if os.path.isfile(file):
+                        os.remove(file)
+                    elif os.path.isdir(file):
+                        shutil.rmtree(file)
+                    else:
+                        print("An error occured deleting the file:")
+                        return 1
                 else:
-                    print("An error occured deleting the file:")
+                    print("The folder/file does not exist")
                     return 1
-            else:
-                print("The folder/file does not exist")
-                return 1
         except Exception as e:
             print("An error occured deleting the file:")
             print(e)
