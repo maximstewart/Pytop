@@ -21,27 +21,28 @@ from utils.FileHandler import FileHandler
 def threaded(fn):
     def wrapper(*args, **kwargs):
         threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+
     return wrapper
+
 
 class Grid:
     def __init__(self, grid, settings):
-        self.grid          = grid
-        self.settings      = settings
-        self.fileHandler   = FileHandler(self.settings)
+        self.grid            = grid
+        self.settings        = settings
+        self.fileHandler     = FileHandler(self.settings)
 
-        self.store         = gtk.ListStore(GdkPixbuf.Pixbuf, str)
-        self.usrHome       = settings.returnUserHome()
-        self.builder       = settings.returnBuilder()
-        self.ColumnSize    = settings.returnColumnSize()
-        self.vidsFilter    = settings.returnVidsFilter()
-        self.imagesFilter  = settings.returnImagesFilter()
-        self.iconFactory   = Icon(settings)
-        self.gtkLock       = False  # Thread checks for gtkLock
-        self.threadLock    = False  # Gtk checks for thread lock
-        self.helperThread  = None   # Helper thread object
-        self.toWorkPool    = []     # Thread fills pool and gtk empties it
-        self.selectedFiles = []
-        self.currentPath   = ""
+        self.store           = gtk.ListStore(GdkPixbuf.Pixbuf, str)
+        self.usrHome         = settings.returnUserHome()
+        self.hideHiddenFiles = settings.isHideHiddenFiles()
+        self.builder         = settings.returnBuilder()
+        self.ColumnSize      = settings.returnColumnSize()
+        self.vidsFilter      = settings.returnVidsFilter()
+        self.imagesFilter    = settings.returnImagesFilter()
+        self.iconFactory     = Icon(settings)
+        self.helperThread    = None   # Helper thread object
+        self.toWorkPool      = []     # Thread fills pool and gtk empties it
+        self.selectedFiles   = []
+        self.currentPath     = ""
 
         self.grid.set_model(self.store)
         self.grid.set_pixbuf_column(0)
@@ -51,8 +52,6 @@ class Grid:
 
 
     def setNewDirectory(self, path):
-        self.store.clear()
-
         self.currentPath = path
         dirPaths         = ['.', '..']
         vids             = []
@@ -62,15 +61,18 @@ class Grid:
 
         for f in listdir(path):
             file = join(path, f)
-            if self.settings.isHideHiddenFiles():
+            if self.hideHiddenFiles:
                 if f.startswith('.'):
                     continue
+
             if isfile(file):
-                if file.lower().endswith(self.vidsFilter):
+                lowerName = file.lower()
+
+                if lowerName.endswith(self.vidsFilter):
                     vids.append(f)
-                elif file.lower().endswith(self.imagesFilter):
+                elif lowerName.endswith(self.imagesFilter):
                     images.append(f)
-                elif file.lower().endswith((".desktop",)):
+                elif lowerName.endswith((".desktop",)):
                     desktop.append(f)
                 else:
                     files.append(f)
@@ -82,53 +84,38 @@ class Grid:
         images.sort()
         desktop.sort()
         files.sort()
-        files = dirPaths + vids + images + desktop + files
 
-        if self.helperThread:
-            self.helperThread.terminate()
-            self.helperThread = None
+        files = dirPaths + vids + images + desktop + files
+        self.store.clear()
 
         # Run helper thread...
-        self.threadLock   = True
-        self.helperThread = threading.Thread(target=self.generateGridIcon, args=(path, files)).start()
-        glib.idle_add(self.addToGrid, (file,))  # NOTE: This must stay in the main thread b/c
-                                                # gtk isn't thread safe/aware So, we
-                                                # make a sad lil thread hot potato 'game'
-                                                # out of this process.
-
+        self.helperThread = threading.Thread(target=self.generateGridIcons, args=(path, files))
+        self.helperThread.daemon = True         # Set this thread as a Daemon Thread
+        self.helperThread.start()
+        # self.generateGridIcons(path, files)
+        glib.idle_add(self.addToGrid, (files,)) # NOTE: This must stay in the main thread b/c
+                                                # gtk isn't thread safe/aware.
 
     # @threaded
-    def generateGridIcon(self, dirPath, files):
-        # NOTE: We'll be passing pixbuf after retreval to keep Icon.py file more
-        # universaly usable. We can just remove get_pixbuf to get a gtk.Image type
+    def generateGridIcons(self, dirPath, files):
         for file in files:
             image = self.iconFactory.createIcon(dirPath, file)
-            self.toWorkPool.append([image.get_pixbuf(), file])
-            self.threadLock = False
-            self.gtkLock    = True
+            self.toWorkPool.append([image, file])
 
 
+    # NOTE: If nothing else is updating, this function gets called immediatly when return is True.
+    # Returning False ends checks and "continues normal flow"
     def addToGrid(self, args):
-        # NOTE: Returning true tells gtk to check again in the future when idle.
-        # False ends checks and "continues normal flow"
         files = args[0]
 
         if len(self.toWorkPool) > 0:
             for dataSet in self.toWorkPool:
-                self.store.append(dataSet)
+                self.store.append([dataSet[0].get_pixbuf(), dataSet[1]])
 
-        if len(self.store) == len(files): # Confirm processed all files and cleanup
-            self.gtkLock    = False
-            self.threadLock = False
-            self.toWorkPool.clear()
+        self.toWorkPool.clear()
+        if len(self.store) == len(files): # Processed all files
             return False
-            # Check again when idle; If nothing else is updating, this function
-            # gets called immediatly. So, we play hot potato by setting lock to Thread
-        else:
-            self.toWorkPool.clear()
-            self.gtkLock    = False
-            self.threadLock = True
-            time.sleep(.005) # Fixes refresh and up icon not being added.
+        else:                             # Check again when idle
             return True
 
     def iconDblLeftClick(self, widget, item):

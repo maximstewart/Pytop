@@ -5,7 +5,6 @@ gi.require_version('Gdk', '3.0')
 
 from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
-from gi.repository import GdkPixbuf
 from xdg.DesktopEntry import DesktopEntry
 
 # Python Imports
@@ -50,10 +49,10 @@ class Icon:
                 if isfile(hashImgPth) == False:
                     self.generateVideoThumbnail(fullPath, hashImgPth)
 
-                thumbnl  = self.createIconImageBuffer(hashImgPth, self.viIconWH)
+                thumbnl  = self.createScaledImage(hashImgPth, self.viIconWH)
             # Image Icon
             elif file.lower().endswith(self.imagesList):
-                thumbnl  = self.createIconImageBuffer(fullPath, self.viIconWH)
+                thumbnl  = self.createScaledImage(fullPath, self.viIconWH)
             # .desktop file parsing
             elif fullPath.lower().endswith( ('.desktop',) ):
                 thumbnl  = self.parseDesktopFiles(fullPath)
@@ -91,7 +90,7 @@ class Icon:
                 hashImgPth = steamIconsDir + fileHash + ".jpg"
                 if isfile(hashImgPth) == True:
                     # Use video sizes since headers are bigger
-                    return self.createIconImageBuffer(hashImgPth, self.viIconWH)
+                    return self.createScaledImage(hashImgPth, self.viIconWH)
 
                 execStr   = xdgObj.getExec()
                 parts     = execStr.split("steam://rungameid/")
@@ -110,9 +109,9 @@ class Icon:
                 proc.wait()
 
                 # Use video sizes since headers are bigger
-                return self.createIconImageBuffer(hashImgPth, self.viIconWH)
+                return self.createScaledImage(hashImgPth, self.viIconWH)
             elif os.path.exists(icon):
-                return self.createIconImageBuffer(icon, self.systemIconImageWH)
+                return self.createScaledImage(icon, self.systemIconImageWH)
             else:
                 for (dirpath, dirnames, filenames) in os.walk(iconsDirs):
                     for file in filenames:
@@ -121,7 +120,7 @@ class Icon:
                             altIconPath = dirpath + "/" + file
                             break
 
-                return self.createIconImageBuffer(altIconPath, self.systemIconImageWH)
+                return self.createScaledImage(altIconPath, self.systemIconImageWH)
         except Exception as e:
             print(e)
             return None
@@ -129,17 +128,15 @@ class Icon:
 
     def getSystemThumbnail(self, filename, size):
         try:
-            iconPath = None
             if os.path.exists(filename):
-                file      = gio.File.new_for_path(filename)
-                info      = file.query_info('standard::icon' , 0 , gio.Cancellable())
+                gioFile   = gio.File.new_for_path(filename)
+                info      = gioFile.query_info('standard::icon' , 0 , gio.Cancellable())
                 icon      = info.get_icon().get_names()[0]
                 iconTheme = gtk.IconTheme.get_default()
-                iconFile  = iconTheme.lookup_icon(icon , size , 0)
-
-                if iconFile != None:
-                    iconPath = iconFile.get_filename()
-                    return self.createIconImageBuffer(iconPath, self.systemIconImageWH)
+                iconData  = iconTheme.lookup_icon(icon , size , 0)
+                if iconData:
+                    iconPath  = iconData.get_filename()
+                    return gtk.Image.new_from_file(iconPath)  # This seems to cause a lot of core dump issues...
                 else:
                     return None
             else:
@@ -149,14 +146,14 @@ class Icon:
             return None
 
 
-    def createIconImageBuffer(self, path, wxh):
+    def createScaledImage(self, path, wxh):
         try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, wxh[0], wxh[1], False)
+            pixbuf       = gtk.Image.new_from_file(path).get_pixbuf()
+            scaledPixBuf = pixbuf.scale_simple(wxh[0], wxh[1], 2)  # 2 = BILINEAR and is best by default
+            return gtk.Image.new_from_pixbuf(scaledPixBuf)
         except Exception as e:
+            print(e)
             return None
-
-        return gtk.Image.new_from_pixbuf(pixbuf)
-
 
     def generateVideoThumbnail(self, fullPath, hashImgPth):
         try:

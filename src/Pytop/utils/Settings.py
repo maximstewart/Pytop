@@ -31,7 +31,7 @@ class Settings:
         self.usrHome            = os.path.expanduser('~')
         self.desktopPath        = self.usrHome + "/Desktop"
         self.iconContainerWxH   = [128, 128]
-        self.systemIconImageWxH = [72, 72]
+        self.systemIconImageWxH = [56, 56]
         self.viIconWxH          = [256, 128]
 
         self.DEFAULTCOLOR     = gdk.RGBA(0.0, 0.0, 0.0, 0.0)   # ~#00000000
