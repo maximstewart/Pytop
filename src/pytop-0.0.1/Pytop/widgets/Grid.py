@@ -24,8 +24,8 @@ def threaded(fn):
     return wrapper
 
 class Grid:
-    def __init__(self, desktop, settings):
-        self.desktop       = desktop
+    def __init__(self, grid, settings):
+        self.grid          = grid
         self.settings      = settings
         self.fileHandler   = FileHandler(self.settings)
 
@@ -33,8 +33,9 @@ class Grid:
         self.usrHome       = settings.returnUserHome()
         self.builder       = settings.returnBuilder()
         self.ColumnSize    = settings.returnColumnSize()
-        self.vidsList      = settings.returnVidsFilter()
-        self.imagesList    = settings.returnImagesFilter()
+        self.vidsFilter    = settings.returnVidsFilter()
+        self.imagesFilter  = settings.returnImagesFilter()
+        self.iconFactory   = Icon(settings)
         self.gtkLock       = False  # Thread checks for gtkLock
         self.threadLock    = False  # Gtk checks for thread lock
         self.helperThread  = None   # Helper thread object
@@ -42,14 +43,14 @@ class Grid:
         self.selectedFiles = []
         self.currentPath   = ""
 
-        self.desktop.set_model(self.store)
-        self.desktop.set_pixbuf_column(0)
-        self.desktop.set_text_column(1)
-        self.desktop.connect("item-activated", self.iconDblLeftClick)
-        self.desktop.connect("button_release_event", self.iconSingleClick, (self.desktop,))
+        self.grid.set_model(self.store)
+        self.grid.set_pixbuf_column(0)
+        self.grid.set_text_column(1)
+        self.grid.connect("item-activated", self.iconDblLeftClick)
+        self.grid.connect("button_release_event", self.iconSingleClick, (self.grid,))
 
 
-    def setIconViewDir(self, path):
+    def setNewDirectory(self, path):
         self.store.clear()
 
         self.currentPath = path
@@ -65,9 +66,9 @@ class Grid:
                 if f.startswith('.'):
                     continue
             if isfile(file):
-                if file.lower().endswith(self.vidsList):
+                if file.lower().endswith(self.vidsFilter):
                     vids.append(f)
-                elif file.lower().endswith(self.imagesList):
+                elif file.lower().endswith(self.imagesFilter):
                     images.append(f)
                 elif file.lower().endswith((".desktop",)):
                     desktop.append(f)
@@ -89,19 +90,19 @@ class Grid:
 
         # Run helper thread...
         self.threadLock   = True
-        self.helperThread = threading.Thread(target=self.generateDirectoryGridIcon, args=(path, files)).start()
-        glib.idle_add(self.addToGrid, (file,))  # This must stay in the main thread b/c
+        self.helperThread = threading.Thread(target=self.generateGridIcon, args=(path, files)).start()
+        glib.idle_add(self.addToGrid, (file,))  # NOTE: This must stay in the main thread b/c
                                                 # gtk isn't thread safe/aware So, we
                                                 # make a sad lil thread hot potato 'game'
                                                 # out of this process.
 
 
     # @threaded
-    def generateDirectoryGridIcon(self, dirPath, files):
+    def generateGridIcon(self, dirPath, files):
         # NOTE: We'll be passing pixbuf after retreval to keep Icon.py file more
         # universaly usable. We can just remove get_pixbuf to get a gtk.Image type
         for file in files:
-            image = Icon(self.settings).createIcon(dirPath, file)
+            image = self.iconFactory.createIcon(dirPath, file)
             self.toWorkPool.append([image.get_pixbuf(), file])
             self.threadLock = False
             self.gtkLock    = True
@@ -138,14 +139,14 @@ class Grid:
             file     = dir + "/" + fileName
 
             if fileName == ".":
-                self.setIconViewDir(dir)
+                self.setNewDirectory(dir)
             elif fileName == "..":
                 parentDir        = os.path.abspath(os.path.join(dir, os.pardir))
                 self.currentPath = parentDir
-                self.setIconViewDir(parentDir)
+                self.setNewDirectory(parentDir)
             elif isdir(file):
                 self.currentPath = file
-                self.setIconViewDir(self.currentPath)
+                self.setNewDirectory(self.currentPath)
             elif isfile(file):
                 self.fileHandler.openFile(file)
         except Exception as e:

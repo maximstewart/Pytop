@@ -10,59 +10,58 @@ from utils import FileHandler
 
 class GridSignals:
     def __init__(self, settings):
-        self.settings     = settings
-        self.filehandler  = FileHandler(settings)
+        self.settings      = settings
+        self.filehandler   = FileHandler(settings)
 
-        self.builder      = self.settings.returnBuilder()
-        self.desktop      = self.builder.get_object("Desktop")
-        selectedDirDialog = self.builder.get_object("selectedDirDialog")
-        filefilter        = self.builder.get_object("Folders")
+        self.builder       = self.settings.returnBuilder()
+        self.gridObj       = self.builder.get_object("Desktop")
+        selectDirDialog    = self.builder.get_object("selectDirDialog")
+        filefilter         = self.builder.get_object("Folders")
 
-        self.desktopPath   = self.settings.returnDesktopPath()
+        self.currentPath   = self.settings.returnDesktopPath()
         self.copyCutArry   = []
         self.selectedFiles = []
-        self.grid          = None
-        self.currentPath   = ""
+        self.gridClss      = None
         self.pasteType     = 1  # copy == 1 and cut == 2
 
         # Add filter to allow only folders to be selected
-        selectedDirDialog.add_filter(filefilter)
-        selectedDirDialog.set_filename(self.desktopPath)
-        self.setIconViewDir(selectedDirDialog)
+        selectDirDialog.add_filter(filefilter)
+        selectDirDialog.set_filename(self.currentPath)
+        self.setNewDirectory(selectDirDialog)
 
 
-    def setIconViewDir(self, widget, data=None):
-        newPath   = widget.get_filename()
-        self.grid = Grid(self.desktop, self.settings)
-        self.grid.setIconViewDir(newPath)
+    def setNewDirectory(self, widget, data=None):
+        newPath       = widget.get_filename()
+        self.gridClss = Grid(self.gridObj, self.settings)
+        self.gridClss.setNewDirectory(newPath)
 
 
     # File control events
     def create(self, wdget):
-        self.currentPath = self.grid.returnCurrentPath()
+        self.currentPath = self.gridClss.returnCurrentPath()
         fileName         = self.builder.get_object("filenameInput").get_text().strip()
         type             = self.builder.get_object("createSwitch").get_state()
 
         if fileName != "":
             fileName = self.currentPath + "/" + fileName
-            status = self.filehandler.create(fileName, type)
+            status   = self.filehandler.create(fileName, type)
             if status == 0:
-                self.grid.setIconViewDir(self.currentPath)
+                self.gridClss.setNewDirectory(self.currentPath)
 
     def copy(self, widget):
         self.pasteType   = 1
-        self.copyCutArry = self.grid.returnSelectedFiles()
+        self.copyCutArry = self.gridClss.returnSelectedFiles()
 
     def cut(self, widget):
         self.pasteType   = 2
-        self.copyCutArry = self.grid.returnSelectedFiles()
+        self.copyCutArry = self.gridClss.returnSelectedFiles()
 
     def paste(self, widget):
-        self.currentPath = self.grid.returnCurrentPath()
+        self.currentPath = self.gridClss.returnCurrentPath()
         status           = self.filehandler.paste(self.copyCutArry, self.currentPath, self.pasteType)
 
         if status == 0:
-            self.grid.setIconViewDir(self.currentPath)
+            self.gridClss.setNewDirectory(self.currentPath)
             if self.pasteType == 2:  # cut == 2
                 self.copyCutArry = []
 
@@ -72,7 +71,7 @@ class GridSignals:
 
         if status == 0:
             self.selectedFiles = []
-            self.grid.setIconViewDir(self.currentPath)
+            self.gridClss.setNewDirectory(self.currentPath)
 
     def trash(self, widget):
         self.getGridInfo()
@@ -80,7 +79,7 @@ class GridSignals:
 
         if status == 0:
             self.selectedFiles = []
-            self.grid.setIconViewDir(self.currentPath)
+            self.gridClss.setNewDirectory(self.currentPath)
 
     def rename(self, widget, data):
         if data.keyval == 65293:  # Enter key press
@@ -94,8 +93,8 @@ class GridSignals:
                 status  = self.filehandler.rename(self.selectedFiles[0], newName.strip())
                 if status == 0:
                     self.selectedFiles = [newName]
-                    self.grid.setIconViewDir(self.currentPath)
+                    self.gridClss.setNewDirectory(self.currentPath)
 
     def getGridInfo(self):
-        self.selectedFiles = self.grid.returnSelectedFiles()
-        self.currentPath   = self.grid.returnCurrentPath()
+        self.selectedFiles = self.gridClss.returnSelectedFiles()
+        self.currentPath   = self.gridClss.returnCurrentPath()

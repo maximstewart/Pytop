@@ -31,13 +31,13 @@
               <placeholder/>
             </child>
             <child type="center">
-              <object class="GtkFileChooserButton" id="selectedDirDialog">
+              <object class="GtkFileChooserButton" id="selectDirDialog">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="action">select-folder</property>
                 <property name="filter">Folders</property>
                 <property name="title" translatable="yes">Directory Chooser</property>
-                <signal name="file-set" handler="setIconViewDir" swapped="no"/>
+                <signal name="file-set" handler="setNewDirectory" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
