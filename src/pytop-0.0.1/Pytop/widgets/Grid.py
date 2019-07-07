@@ -39,14 +39,14 @@ class Grid:
         self.threadLock    = False  # Gtk checks for thread lock
         self.helperThread  = None   # Helper thread object
         self.toWorkPool    = []     # Thread fills pool and gtk empties it
-        self.SelectedFiles = []
+        self.selectedFiles = []
         self.currentPath   = ""
 
         self.desktop.set_model(self.store)
         self.desktop.set_pixbuf_column(0)
         self.desktop.set_text_column(1)
         self.desktop.connect("item-activated", self.iconDblLeftClick)
-        self.desktop.connect("button_press_event", self.iconRightClick, (self.desktop,))
+        self.desktop.connect("button_release_event", self.iconSingleClick, (self.desktop,))
 
 
     def setIconViewDir(self, path):
@@ -151,39 +151,53 @@ class Grid:
         except Exception as e:
             print(e)
 
-    def iconRightClick(self, widget, eve, rclicked_icon):
+    def iconSingleClick(self, widget, eve, rclicked_icon):
         try:
-            if eve.type == gdk.EventType.BUTTON_PRESS and eve.button == 3:
-                input    = self.builder.get_object("iconRenameInput")
-                controls = self.builder.get_object("iconControlsWindow")
+            if eve.type == gdk.EventType.BUTTON_RELEASE and eve.button == 1:
+                self.selectedFiles.clear()
                 items    = widget.get_selected_items()
                 model    = widget.get_model()
-                self.SelectedFiles.clear()
+                dir      = self.currentPath
 
-                if len(items) == 1:
-                    fileName = model[items[0]][1]
-                    dir      = self.currentPath
-                    file     = dir + "/" + fileName
+                for item in items:
+                    fileName = model[item][1]
 
-                    self.SelectedFiles.append(file)     # Used for return to caller
-                    input.set_text(fileName)
-                    controls.show_all()
-                elif len(items) > 1:
-                    dir = self.currentPath
-                    for item in items:
-                        fileName = model[item][1]
-                        file     = dir + "/" + fileName
-                        self.SelectedFiles.append(file) # Used for return to caller
+                    if fileName != "." and fileName != "..":
+                        file = dir + "/" + fileName
+                        self.selectedFiles.append(file) # Used for return to caller
 
+            elif eve.type == gdk.EventType.BUTTON_RELEASE and eve.button == 3:
+                input          = self.builder.get_object("filenameInput")
+                controls       = self.builder.get_object("iconControlsWindow")
+                iconsButtonBox = self.builder.get_object("iconsButtonBox")
+                menuButtonBox  = self.builder.get_object("menuButtonBox")
+
+
+                if len(self.selectedFiles) == 1:
+                    parts = self.selectedFiles[0].split("/")
+                    input.set_text(parts[len(parts) - 1])
+                    input.show()
+                    iconsButtonBox.show()
+                    menuButtonBox.hide()
+                    controls.show()
+                elif len(self.selectedFiles) > 1:
                     input.set_text("")
                     input.hide()
+                    menuButtonBox.hide()
+                    iconsButtonBox.show()
+                    controls.show()
+                else:
+                    input.set_text("")
+                    input.show()
+                    menuButtonBox.show()
+                    iconsButtonBox.hide()
                     controls.show()
 
         except Exception as e:
             print(e)
 
     def returnSelectedFiles(self):
-        return self.SelectedFiles
+        return self.selectedFiles
 
     def returnCurrentPath(self):
         return self.currentPath

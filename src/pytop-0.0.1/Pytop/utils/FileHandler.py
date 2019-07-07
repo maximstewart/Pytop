@@ -55,33 +55,58 @@ class FileHandler:
             subprocess.Popen(['xdg-open', file])
 
 
-    def createFile(self, newFileName):
-        pass
-
-    def updateFile(self, oldFileName, newFileName):
+    def create(self, name, type):
         try:
-            print("Renaming...")
-            print(oldFileName + "  -->  " + newFileName)
-            os.rename(oldFileName, newFileName)
-            return 0
+            if type == True:     # Create File
+                open(name, 'w')
+            else:                # Create Folder
+                os.mkdir(name)
         except Exception as e:
-            print("An error occured renaming the file:")
+            return 1
+
+        return 0
+
+    def paste(self, files, toPath, pasteType):
+        try:
+            for file in files:
+                parts     = file.split("/")
+                toBePath  = toPath + parts[len(parts) - 1]
+                finalForm = file + self.dedupPathIter(toBePath)
+
+                print(toBePath)
+                print(finalForm)
+        except Exception as e:
+            return 1
+
+            # if finalForm != file:
+            #     os.rename(file, finalForm)
+            #
+            # if pasteType == 1:  # copy paste == 1
+            #     shutil.move(finalForm, toPath)
+            # if pasteType == 2:  #  cut paste == 2
+            #     shutil.copy2(finalForm, toPath)
+
+    def delete(self, toDeleteFiles):
+        try:
+            print("Deleting...")
+            for file in toDeleteFiles:
+                print(file)
+                if os.path.exists(file):
+                    if os.path.isfile(file):
+                        os.remove(file)
+                    elif os.path.isdir(file):
+                        shutil.rmtree(file)
+                else:
+                    print("The folder/file does not exist")
+                    return 1
+        except Exception as e:
+            print("An error occured deleting the file:")
             print(e)
             return 1
 
-    def dedupPathIter(self, toBeTrashPath):
-        i             = 0
-        duplicateFix  = ""
+        return 0
 
-        if os.path.exists(toBeTrashPath):
-            while os.path.exists(toBeTrashPath + duplicateFix) == True:
-                i+=1
-                duplicateFix = "-" + str(i)
-
-        return duplicateFix
-
-
-    def moveToTrash(self, toTrashFiles):
+    def trash(self, toTrashFiles):
         try:
             print("Moving to Trash...")
             for file in toTrashFiles:
@@ -105,34 +130,30 @@ class FileHandler:
 
         return 0
 
-    def deleteFiles(self, toDeleteFiles):
+    def rename(self, oldFileName, newFileName):
         try:
-            print("Deleting...")
-            for file in toDeleteFiles:
-                print(file)
-                if os.path.exists(file):
-                    if os.path.isfile(file):
-                        os.remove(file)
-                    elif os.path.isdir(file):
-                        shutil.rmtree(file)
-                    else:
-                        print("An error occured deleting the file:")
-                        return 1
-                else:
-                    print("The folder/file does not exist")
-                    return 1
+            if os.path.exists(oldFileName):
+                print("Renaming...")
+                print(oldFileName + "  -->  " + newFileName)
+                os.rename(oldFileName, newFileName)
+            else:
+                print("The folder/file does not exist")
+                return 1
         except Exception as e:
-            print("An error occured deleting the file:")
+            print("An error occured renaming the file:")
             print(e)
             return 1
 
         return 0
 
-    def copyFile(self):
-        pass
 
-    def cutFile(self):
-        pass
+    def dedupPathIter(self, toBeTrashPath):
+        duplicateFix  = ""
+        i             = 0
 
-    def pasteFile(self):
-        pass
+        if os.path.exists(toBeTrashPath):
+            while os.path.exists(toBeTrashPath + duplicateFix) == True:
+                i+=1
+                duplicateFix = "-" + str(i)
+
+        return duplicateFix
