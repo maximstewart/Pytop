@@ -62,6 +62,7 @@ class FileHandler:
             else:                # Create Folder
                 os.mkdir(name)
         except Exception as e:
+            print(e)
             return 1
 
         return 0
@@ -69,22 +70,26 @@ class FileHandler:
     def paste(self, files, toPath, pasteType):
         try:
             for file in files:
-                parts     = file.split("/")
-                toBePath  = toPath + parts[len(parts) - 1]
-                finalForm = file + self.dedupPathIter(toBePath)
+                parts       = file.split("/")
+                toBePath    = toPath + "/" + parts[len(parts) - 1]  # Used to check for duplicates
+                finalForm   = file + self.dedupPathIter(toBePath)
+                isDuplicate = finalForm != file
 
-                print(toBePath)
-                print(finalForm)
+                if isDuplicate:
+                    os.rename(file, finalForm)
+
+                if pasteType == 1:    # copy paste = 1
+                    shutil.copy2(finalForm, toPath)
+                    if isDuplicate:
+                        os.rename(finalForm, file)  # Rename back after copy completes
+                if pasteType == 2:    #  cut paste = 2
+                    shutil.move(finalForm, toPath)
+
         except Exception as e:
+            print(e)
             return 1
 
-            # if finalForm != file:
-            #     os.rename(file, finalForm)
-            #
-            # if pasteType == 1:  # copy paste == 1
-            #     shutil.move(finalForm, toPath)
-            # if pasteType == 2:  #  cut paste == 2
-            #     shutil.copy2(finalForm, toPath)
+        return 0
 
     def delete(self, toDeleteFiles):
         try:
@@ -124,7 +129,6 @@ class FileHandler:
                     print("The folder/file does not exist")
                     return 1
         except Exception as e:
-            print("An error occured moving the file to trash:")
             print(e)
             return 1
 
@@ -140,7 +144,6 @@ class FileHandler:
                 print("The folder/file does not exist")
                 return 1
         except Exception as e:
-            print("An error occured renaming the file:")
             print(e)
             return 1
 

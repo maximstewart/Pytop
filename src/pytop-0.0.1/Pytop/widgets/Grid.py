@@ -197,7 +197,13 @@ class Grid:
             print(e)
 
     def returnSelectedFiles(self):
-        return self.selectedFiles
+        # NOTE: Just returning selectedFiles looks like it returns a "pointer"
+        # to the children. This mean we lose the list if any left click occures
+        # in this class.
+        files = []
+        for file in self.selectedFiles:
+            files.append(file)
+        return files
 
     def returnCurrentPath(self):
         return self.currentPath

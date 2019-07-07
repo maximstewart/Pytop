@@ -58,9 +58,9 @@ class GridSignals:
         self.copyCutArry = self.grid.returnSelectedFiles()
 
     def paste(self, widget):
-        print(len(self.copyCutArry))
         self.currentPath = self.grid.returnCurrentPath()
-        status           =  self.filehandler.paste(self.copyCutArry, self.currentPath, self.pasteType)
+        status           = self.filehandler.paste(self.copyCutArry, self.currentPath, self.pasteType)
+
         if status == 0:
             self.grid.setIconViewDir(self.currentPath)
             if self.pasteType == 2:  # cut == 2
