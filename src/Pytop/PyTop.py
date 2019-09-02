@@ -11,12 +11,15 @@ from gi.repository import GLib
 # Python imports
 import inspect
 
+from setproctitle import setproctitle
+
 # Application imports
 from utils import Settings
 from signal_classes import CrossClassSignals, GridSignals
 
 
 class Main:
+    setproctitle('Pytop')
     def __init__(self):
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
         faulthandler.enable()  # For better debug info
