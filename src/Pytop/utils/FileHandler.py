@@ -35,24 +35,22 @@ class FileHandler:
         self.TRASHINFOFOLDER  = settings.returnTrshInfoPth()
 
 
-
-    @threaded
     def openFile(self, file):
         print("Opening: " + file)
         if file.lower().endswith(self.vids):
-            subprocess.Popen([self.MEDIAPLAYER, self.MPV_WH, file])
+            subprocess.Popen([self.MEDIAPLAYER, self.MPV_WH, file], stdout=subprocess.PIPE)
         elif file.lower().endswith(self.music):
-            subprocess.Popen([self.MUSICPLAYER, file])
+            subprocess.Popen([self.MUSICPLAYER, file], stdout=subprocess.PIPE)
         elif file.lower().endswith(self.images):
-            subprocess.Popen([self.IMGVIEWER, file])
+            subprocess.Popen([self.IMGVIEWER, file], stdout=subprocess.PIPE)
         elif file.lower().endswith(self.txt):
-            subprocess.Popen([self.TEXTVIEWER, file])
+            subprocess.Popen([self.TEXTVIEWER, file], stdout=subprocess.PIPE)
         elif file.lower().endswith(self.pdf):
-            subprocess.Popen([self.PDFVIEWER, file])
+            subprocess.Popen([self.PDFVIEWER, file], stdout=subprocess.PIPE)
         elif file.lower().endswith(self.office):
-            subprocess.Popen([self.OFFICEPROG, file])
+            subprocess.Popen([self.OFFICEPROG, file], stdout=subprocess.PIPE)
         else:
-            subprocess.Popen(['xdg-open', file])
+            subprocess.Popen(['xdg-open', file], stdout=subprocess.PIPE)
 
 
     def create(self, name, type):

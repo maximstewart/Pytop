@@ -15,12 +15,12 @@ from setproctitle import setproctitle
 
 # Application imports
 from utils import Settings
-from signal_classes import CrossClassSignals, GridSignals
+from signal_classes import CrossClassSignals, GridSignals, TaskbarSignals
 
 
 class Main:
-    setproctitle('Pytop')
     def __init__(self):
+        setproctitle('Pytop')
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
         faulthandler.enable()  # For better debug info
 
@@ -31,7 +31,8 @@ class Main:
         # Gets the methods from the classes and sets to handler.
         # Then, builder connects to any signals it needs.
         classes  = [CrossClassSignals(settings),
-                    GridSignals(settings)]
+                    GridSignals(settings),
+                    TaskbarSignals(settings)]
 
         handlers = {}
         for c in classes:

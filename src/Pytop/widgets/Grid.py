@@ -50,7 +50,7 @@ class Grid:
         self.grid.connect("item-activated", self.iconDblLeftClick)
         self.grid.connect("button_release_event", self.iconSingleClick, (self.grid,))
 
-
+    # @threaded
     def setNewDirectory(self, path):
         self.currentPath = path
         dirPaths         = ['.', '..']
@@ -112,7 +112,8 @@ class Grid:
             for dataSet in self.toWorkPool:
                 self.store.append([dataSet[0].get_pixbuf(), dataSet[1]])
 
-        self.toWorkPool.clear()
+            self.toWorkPool.clear()
+
         if len(self.store) == len(files): # Processed all files
             return False
         else:                             # Check again when idle
