@@ -9,6 +9,8 @@ Added task bar.
 
 # TODO
 <ul>
+<li>Detect window title changes</li>
+<li>Set taskbar menu option based on window options.</li>
 <li>Attach copy, cut, and paste signals to the controls menu.</li>
 <li>Add a settings file to store values.</li>
 </ul>
