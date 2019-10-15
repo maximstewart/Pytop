@@ -20,7 +20,7 @@ from utils.FileHandler import FileHandler
 
 def threaded(fn):
     def wrapper(*args, **kwargs):
-        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+        thread = threading.Thread(target=fn, args=args, kwargs=kwargs).start()
 
     return wrapper
 
@@ -85,8 +85,10 @@ class Grid:
         desktop.sort()
         files.sort()
 
+        startVideoIcons = len(dirPaths)
         files = dirPaths + vids + images + desktop + files
         self.generateGridIcons(path, files)
+        self.fillVideoIcons(path, vids, startVideoIcons)
 
 
     @threaded
@@ -95,8 +97,28 @@ class Grid:
             image = self.iconFactory.createIcon(dirPath, file).get_pixbuf()
             glib.idle_add(self.addToGrid, (image, file,))
 
+    @threaded
+    def fillVideoIcons(self, dirPath, files, start):
+        model = self.grid.get_model()
+
+        # Wait till we have a proper index...
+        while len(self.store) < (start + 1):
+            time.sleep(.500)
+
+        i = start
+        for file in files:
+            image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
+            iter  = model.get_iter_from_string(str(i))
+            glib.idle_add(self.replaceInGrid, (iter, image,))
+            i += 1
+
     def addToGrid(self, dataSet):
         self.store.append([dataSet[0], dataSet[1]])
+
+    def replaceInGrid(self, dataSet):
+        # Iter, row column, new pixbuf...
+        self.store.set_value(dataSet[0], 0 , dataSet[1])
+
 
     def iconDblLeftClick(self, widget, item):
         try:

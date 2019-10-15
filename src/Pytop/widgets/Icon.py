@@ -36,21 +36,32 @@ class Icon:
         fullPath = dir + "/" + file
         return self.getIconImage(file, fullPath)
 
+    def createThumbnail(self, dir, file):
+        fullPath = dir + "/" + file
+        # Video thumbnail
+        if file.lower().endswith(self.vidsList):
+            fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
+            hashImgPth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
+
+            if isfile(hashImgPth) == False:
+                self.generateVideoThumbnail(fullPath, hashImgPth)
+
+            thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
+
+            if thumbnl == None: # If no icon, try stock file icon...
+                thumbnl = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
+
+            if thumbnl == None: # If no icon whatsoever, return internal default
+                thumbnl = gtk.Image.new_from_file("resources/icons/bin.png")
+
+        return thumbnl
+
     def getIconImage(self, file, fullPath):
         try:
             thumbnl = None
 
-            # Video thumbnail
-            if file.lower().endswith(self.vidsList):
-                fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
-                hashImgPth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
-
-                if isfile(hashImgPth) == False:
-                    self.generateVideoThumbnail(fullPath, hashImgPth)
-
-                thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
             # Image Icon
-            elif file.lower().endswith(self.imagesList):
+            if file.lower().endswith(self.imagesList):
                 thumbnl = self.createScaledImage(fullPath, self.viIconWH)
             # .desktop file parsing
             elif fullPath.lower().endswith( ('.desktop',) ):
