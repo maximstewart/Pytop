@@ -30,6 +30,8 @@ class Icon:
         self.iconContainerWH   = settings.returnContainerWH()
         self.systemIconImageWH = settings.returnSystemIconImageWH()
         self.viIconWH          = settings.returnVIIconWH()
+        self.SCRIPT_PTH        = os.path.dirname(os.path.realpath(__file__)) + "/"
+        self.INTERNAL_ICON_PTH = self.SCRIPT_PTH + "../resources/icons/text.png"
 
 
     def createIcon(self, dir, file):
@@ -38,30 +40,36 @@ class Icon:
 
     def createThumbnail(self, dir, file):
         fullPath = dir + "/" + file
-        # Video thumbnail
-        if file.lower().endswith(self.vidsList):
-            fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
-            hashImgPth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
+        try:
+            # Video thumbnail
+            if file.lower().endswith(self.vidsList):
+                fileHash   = hashlib.sha256(str.encode(fullPath)).hexdigest()
+                hashImgPth = self.usrHome + "/.thumbnails/normal/" + fileHash + ".png"
 
-            if isfile(hashImgPth) == False:
-                self.generateVideoThumbnail(fullPath, hashImgPth)
+                if isfile(hashImgPth) == False:
+                    self.generateVideoThumbnail(fullPath, hashImgPth)
 
-            thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
+                thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
 
-            if thumbnl == None: # If no icon, try stock file icon...
-                thumbnl = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
+                if thumbnl == None: # If no icon whatsoever, return internal default
+                    thumbnl = gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
 
-            if thumbnl == None: # If no icon whatsoever, return internal default
-                thumbnl = gtk.Image.new_from_file("resources/icons/bin.png")
+            return thumbnl
+        except Exception as e:
+            print("Thumbnail generation issue:")
+            print(e)
+            return gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
 
-        return thumbnl
 
     def getIconImage(self, file, fullPath):
         try:
             thumbnl = None
 
+            # Video icon
+            if file.lower().endswith(self.vidsList):
+                thumbnl = gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
             # Image Icon
-            if file.lower().endswith(self.imagesList):
+            elif file.lower().endswith(self.imagesList):
                 thumbnl = self.createScaledImage(fullPath, self.viIconWH)
             # .desktop file parsing
             elif fullPath.lower().endswith( ('.desktop',) ):
@@ -70,16 +78,14 @@ class Icon:
             else:
                 thumbnl = self.getSystemThumbnail(fullPath, self.systemIconImageWH[0])
 
-            if thumbnl == None: # If no icon, try stock file icon...
-                thumbnl = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
-
             if thumbnl == None: # If no icon whatsoever, return internal default
-                thumbnl = gtk.Image.new_from_file("resources/icons/bin.png")
+                thumbnl = gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
 
             return thumbnl
         except Exception as e:
+            print("Icon generation issue:")
             print(e)
-            return gtk.Image.new_from_file("resources/icons/bin.png")
+            return gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
 
 
     def parseDesktopFiles(self, fullPath):
@@ -132,6 +138,7 @@ class Icon:
 
                 return self.createScaledImage(altIconPath, self.systemIconImageWH)
         except Exception as e:
+            print(".desktop icon generation issue:")
             print(e)
             return None
 
@@ -140,7 +147,7 @@ class Icon:
         try:
             if os.path.exists(filename):
                 gioFile   = gio.File.new_for_path(filename)
-                info      = gioFile.query_info('standard::icon' , 0 , gio.Cancellable())
+                info      = gioFile.query_info('standard::icon' , 0, gio.Cancellable())
                 icon      = info.get_icon().get_names()[0]
                 iconTheme = gtk.IconTheme.get_default()
                 iconData  = iconTheme.lookup_icon(icon , size , 0)
@@ -152,6 +159,7 @@ class Icon:
             else:
                 return None
         except Exception as e:
+            print("system icon generation issue:")
             print(e)
             return None
 
@@ -162,6 +170,7 @@ class Icon:
             scaledPixBuf = pixbuf.scale_simple(wxh[0], wxh[1], 2)  # 2 = BILINEAR and is best by default
             return gtk.Image.new_from_pixbuf(scaledPixBuf)
         except Exception as e:
+            print("Image Scaling Issue:")
             print(e)
             return None
 
@@ -170,4 +179,5 @@ class Icon:
             proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPath, "-o", hashImgPth])
             proc.wait()
         except Exception as e:
+            print("Video thumbnail generation issue in thread:")
             print(e)

@@ -20,8 +20,7 @@ from utils.FileHandler import FileHandler
 
 def threaded(fn):
     def wrapper(*args, **kwargs):
-        thread = threading.Thread(target=fn, args=args, kwargs=kwargs).start()
-
+        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
     return wrapper
 
 
@@ -85,10 +84,9 @@ class Grid:
         desktop.sort()
         files.sort()
 
-        startVideoIcons = len(dirPaths)
         files = dirPaths + vids + images + desktop + files
         self.generateGridIcons(path, files)
-        self.fillVideoIcons(path, vids, startVideoIcons)
+        self.fillVideoIcons(path, vids, len(dirPaths))
 
 
     @threaded
@@ -103,7 +101,7 @@ class Grid:
 
         # Wait till we have a proper index...
         while len(self.store) < (start + 1):
-            time.sleep(.500)
+            time.sleep(.200)
 
         i = start
         for file in files:
