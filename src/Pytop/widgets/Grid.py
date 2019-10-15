@@ -40,7 +40,6 @@ class Grid:
         self.imagesFilter    = settings.returnImagesFilter()
         self.iconFactory     = Icon(settings)
         self.helperThread    = None   # Helper thread object
-        self.toWorkPool      = []     # Thread fills pool and gtk empties it
         self.selectedFiles   = []
         self.currentPath     = ""
 
@@ -52,6 +51,7 @@ class Grid:
 
     # @threaded
     def setNewDirectory(self, path):
+        self.store.clear()
         self.currentPath = path
         dirPaths         = ['.', '..']
         vids             = []
@@ -86,38 +86,17 @@ class Grid:
         files.sort()
 
         files = dirPaths + vids + images + desktop + files
-        self.store.clear()
+        self.generateGridIcons(path, files)
 
-        # Run helper thread...
-        self.helperThread = threading.Thread(target=self.generateGridIcons, args=(path, files))
-        self.helperThread.daemon = True         # Set this thread as a Daemon Thread
-        self.helperThread.start()
-        # self.generateGridIcons(path, files)
-        glib.idle_add(self.addToGrid, (files,)) # NOTE: This must stay in the main thread b/c
-                                                # gtk isn't thread safe/aware.
 
-    # @threaded
+    @threaded
     def generateGridIcons(self, dirPath, files):
         for file in files:
-            image = self.iconFactory.createIcon(dirPath, file)
-            self.toWorkPool.append([image, file])
+            image = self.iconFactory.createIcon(dirPath, file).get_pixbuf()
+            glib.idle_add(self.addToGrid, (image, file,))
 
-
-    # NOTE: If nothing else is updating, this function gets called immediatly when return is True.
-    # Returning False ends checks and "continues normal flow"
-    def addToGrid(self, args):
-        files = args[0]
-
-        if len(self.toWorkPool) > 0:
-            for dataSet in self.toWorkPool:
-                self.store.append([dataSet[0].get_pixbuf(), dataSet[1]])
-
-            self.toWorkPool.clear()
-
-        if len(self.store) == len(files): # Processed all files
-            return False
-        else:                             # Check again when idle
-            return True
+    def addToGrid(self, dataSet):
+        self.store.append([dataSet[0], dataSet[1]])
 
     def iconDblLeftClick(self, widget, item):
         try:
@@ -187,7 +166,7 @@ class Grid:
 
     def returnSelectedFiles(self):
         # NOTE: Just returning selectedFiles looks like it returns a "pointer"
-        # to the children. This mean we lose the list if any left click occures
+        # to the children. This means we lose the list if any left click occures
         # in this class.
         files = []
         for file in self.selectedFiles:
@@ -195,4 +174,5 @@ class Grid:
         return files
 
     def returnCurrentPath(self):
-        return self.currentPath
+        currentPath = self.currentPath
+        return currentPath

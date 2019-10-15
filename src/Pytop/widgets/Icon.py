@@ -36,10 +36,9 @@ class Icon:
         fullPath = dir + "/" + file
         return self.getIconImage(file, fullPath)
 
-
     def getIconImage(self, file, fullPath):
         try:
-            thumbnl    = None
+            thumbnl = None
 
             # Video thumbnail
             if file.lower().endswith(self.vidsList):
@@ -49,22 +48,22 @@ class Icon:
                 if isfile(hashImgPth) == False:
                     self.generateVideoThumbnail(fullPath, hashImgPth)
 
-                thumbnl  = self.createScaledImage(hashImgPth, self.viIconWH)
+                thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
             # Image Icon
             elif file.lower().endswith(self.imagesList):
-                thumbnl  = self.createScaledImage(fullPath, self.viIconWH)
+                thumbnl = self.createScaledImage(fullPath, self.viIconWH)
             # .desktop file parsing
             elif fullPath.lower().endswith( ('.desktop',) ):
-                thumbnl  = self.parseDesktopFiles(fullPath)
+                thumbnl = self.parseDesktopFiles(fullPath)
             # System icons
             else:
-                thumbnl  = self.getSystemThumbnail(fullPath, self.systemIconImageWH[0])
+                thumbnl = self.getSystemThumbnail(fullPath, self.systemIconImageWH[0])
 
             if thumbnl == None: # If no icon, try stock file icon...
-                thumbnl  = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
+                thumbnl = gtk.Image.new_from_icon_name("gtk-file", gtk.IconSize.LARGE_TOOLBAR)
 
             if thumbnl == None: # If no icon whatsoever, return internal default
-                thumbnl  = gtk.Image.new_from_file("resources/icons/bin.png")
+                thumbnl = gtk.Image.new_from_file("resources/icons/bin.png")
 
             return thumbnl
         except Exception as e:

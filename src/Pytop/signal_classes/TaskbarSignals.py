@@ -63,8 +63,6 @@ class TaskbarSignals:
 
     def setScreenSignals(self):
         self.SCREEN.connect("active-workspace-changed", self.activeWorkspaceChanged)
-        # self.SCREEN.connect("application-opened", self.applicationOpened)
-        # self.SCREEN.connect("application-closed", self.applicationClosed)
         self.SCREEN.connect("window-opened", self.windowOpened)
         self.SCREEN.connect("window-closed", self.windowClosed)
 
@@ -84,8 +82,10 @@ class TaskbarSignals:
                 window.activate(1)
         if e.type == gdk.EventType.BUTTON_PRESS and e.button == MouseButtons.RIGHT_BUTTON:
             self.window = window
-            self.taskbarMenu.set_relative_to(widget)
-            self.taskbarMenu.popup()
+            self.taskbarMenu.show()
+
+    def hideTaskbarMenu(self, widget, eve):
+        widget.hide()
 
     def setPagerWidget(self):
         pager = wnck.Pager()
@@ -100,11 +100,13 @@ class TaskbarSignals:
         self.SCREEN = screen
         self.SCREEN.force_update() # (Re)populate screen windows list
         self.refreashTaskbar()
+
     def windowOpened(self, screen, window):
         self.SCREEN.force_update() # (Re)populate screen windows list
         btn = self.createWinBttn(window)
         self.setupSignals(btn, window)
         self.taskBarButtons.add(btn)
+
     def windowClosed(self, screen, window):
         self.clearChildren(self.taskBarButtons)
         self.SCREEN.force_update() # (Re)populate screen windows list

@@ -38,19 +38,19 @@ class FileHandler:
     def openFile(self, file):
         print("Opening: " + file)
         if file.lower().endswith(self.vids):
-            subprocess.Popen([self.MEDIAPLAYER, self.MPV_WH, file], stdout=subprocess.PIPE)
+            subprocess.Popen([self.MEDIAPLAYER, self.MPV_WH, file], stdout=subprocess.PIPE, close_fds=True)
         elif file.lower().endswith(self.music):
-            subprocess.Popen([self.MUSICPLAYER, file], stdout=subprocess.PIPE)
+            subprocess.Popen([self.MUSICPLAYER, file], stdout=subprocess.PIPE, close_fds=True)
         elif file.lower().endswith(self.images):
-            subprocess.Popen([self.IMGVIEWER, file], stdout=subprocess.PIPE)
+            subprocess.Popen([self.IMGVIEWER, file], stdout=subprocess.PIPE, close_fds=True)
         elif file.lower().endswith(self.txt):
-            subprocess.Popen([self.TEXTVIEWER, file], stdout=subprocess.PIPE)
+            subprocess.Popen([self.TEXTVIEWER, file], stdout=subprocess.PIPE, close_fds=True)
         elif file.lower().endswith(self.pdf):
-            subprocess.Popen([self.PDFVIEWER, file], stdout=subprocess.PIPE)
+            subprocess.Popen([self.PDFVIEWER, file], stdout=subprocess.PIPE, close_fds=True)
         elif file.lower().endswith(self.office):
-            subprocess.Popen([self.OFFICEPROG, file], stdout=subprocess.PIPE)
+            subprocess.Popen([self.OFFICEPROG, file], stdout=subprocess.PIPE, close_fds=True)
         else:
-            subprocess.Popen(['xdg-open', file], stdout=subprocess.PIPE)
+            subprocess.Popen(['xdg-open', file], stdout=subprocess.PIPE, close_fds=True)
 
 
     def create(self, name, type):
