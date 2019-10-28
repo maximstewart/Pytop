@@ -48,7 +48,6 @@ class Grid:
         self.grid.connect("item-activated", self.iconDblLeftClick)
         self.grid.connect("button_release_event", self.iconSingleClick, (self.grid,))
 
-    # @threaded
     def setNewDirectory(self, path):
         self.store.clear()
         self.currentPath = path
@@ -131,9 +130,11 @@ class Grid:
                 parentDir        = os.path.abspath(os.path.join(dir, os.pardir))
                 self.currentPath = parentDir
                 self.setNewDirectory(parentDir)
+                self.settings.saveSettings(parentDir)
             elif isdir(file):
                 self.currentPath = file
                 self.setNewDirectory(self.currentPath)
+                self.settings.saveSettings(self.currentPath)
             elif isfile(file):
                 self.fileHandler.openFile(file)
         except Exception as e:

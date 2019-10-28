@@ -7,7 +7,7 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
 
 # Python imports
-import os
+import os, json
 
 # Application imports
 
@@ -52,6 +52,12 @@ class Settings:
         self.MPV_WH           = " -geometry 50%:50% ";
         self.GTK_ORIENTATION  = 1   # HORIZONTAL (0) VERTICAL (1)
 
+        configFolder    = os.path.expanduser('~') + "/.config/pytop/"
+        self.configFile = configFolder + "settings.ini"
+
+        if os.path.isdir(configFolder) == False:
+            os.mkdir(configFolder)
+
         if os.path.isdir(self.TRASHFOLDER) == False:
             os.mkdir(TRASHFILESFOLDER)
             os.mkdir(TRASHINFOFOLDER)
@@ -61,6 +67,10 @@ class Settings:
 
         if os.path.isdir(self.TRASHINFOFOLDER) == False:
             os.mkdir(TRASHINFOFOLDER)
+
+        if os.path.isfile(self.configFile) == False:
+            open(self.configFile, 'a').close()
+            self.saveSettings(self.desktopPath)
 
 
     def attachBuilder(self, builder):
@@ -100,6 +110,36 @@ class Settings:
             print(str(monitor.width) + "x" + str(monitor.height) + "+" + str(monitor.x) + "+" + str(monitor.y))
 
         return monitors
+
+
+    def saveSettings(self, startPath):
+        data = {}
+        data['pytop_settings'] = []
+
+        data['pytop_settings'].append({
+          'startPath' : startPath
+        })
+
+        with open(self.configFile, 'w') as outfile:
+            json.dump(data, outfile)
+
+
+    def returnSettings(self):
+        returnData = []
+
+        with open(self.configFile) as infile:
+            try:
+                data = json.load(infile)
+                for obj in data['pytop_settings']:
+                    returnData = [obj['startPath']]
+            except Exception as e:
+                returnData = ['~/Desktop/']
+
+
+        if returnData[0] == '':
+            returnData[0] = '~/Desktop/'
+
+        return returnData
 
 
     def returnBuilder(self):             return self.builder
