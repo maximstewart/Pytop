@@ -2,7 +2,7 @@
 Pytop is a Gtk + Python gui to have a custom desktop interface.
 
 # Updates
-Added task bar.
+convirted to using ffmpeg to generate thumbnail.
 
 # Notes
 ```sudo apt-get install python3 wget steamcmd```

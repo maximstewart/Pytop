@@ -50,7 +50,6 @@ class Icon:
                     self.generateVideoThumbnail(fullPath, hashImgPth)
 
                 thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
-
                 if thumbnl == None: # If no icon whatsoever, return internal default
                     thumbnl = gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
 
@@ -175,8 +174,9 @@ class Icon:
             return None
 
     def generateVideoThumbnail(self, fullPath, hashImgPth):
+        proc = None
         try:
-            proc = subprocess.Popen([self.thubnailGen, "-t", "65%", "-s", "300", "-c", "jpg", "-i", fullPath, "-o", hashImgPth])
+            proc = subprocess.Popen(["ffmpeg", "-i", fullPath, "-vframes", "1", "-s", "320x180", "-q:v", "2", hashImgPth])
             proc.wait()
         except Exception as e:
             print("Video thumbnail generation issue in thread:")
