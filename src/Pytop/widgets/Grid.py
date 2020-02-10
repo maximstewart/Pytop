@@ -38,7 +38,6 @@ class Grid:
         self.vidsFilter      = settings.returnVidsFilter()
         self.imagesFilter    = settings.returnImagesFilter()
         self.iconFactory     = Icon(settings)
-        self.helperThread    = None   # Helper thread object
         self.selectedFiles   = []
         self.currentPath     = ""
 
@@ -94,6 +93,7 @@ class Grid:
             image = self.iconFactory.createIcon(dirPath, file).get_pixbuf()
             glib.idle_add(self.addToGrid, (image, file,))
 
+
     @threaded
     def fillVideoIcons(self, dirPath, files, start):
         model = self.grid.get_model()
@@ -104,10 +104,14 @@ class Grid:
 
         i = start
         for file in files:
-            image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
-            iter  = model.get_iter_from_string(str(i))
-            glib.idle_add(self.replaceInGrid, (iter, image,))
+            self.updateGrid(model, dirPath, file, i)
             i += 1
+
+    @threaded
+    def updateGrid(self, model, dirPath, file, i):
+        image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
+        iter  = model.get_iter_from_string(str(i))
+        glib.idle_add(self.replaceInGrid, (iter, image,))
 
     def addToGrid(self, dataSet):
         self.store.append([dataSet[0], dataSet[1]])
