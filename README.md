@@ -2,7 +2,7 @@
 Pytop is a Gtk + Python gui to have a custom desktop interface.
 
 # Updates
-convirted to using ffmpeg to generate thumbnail.
+Set taskbar menu option based on window options.
 
 # Notes
 ```sudo apt-get install python3 wget steamcmd```
@@ -10,5 +10,4 @@ convirted to using ffmpeg to generate thumbnail.
 # TODO
 <ul>
 <li>Detect window title changes</li>
-<li>Set taskbar menu option based on window options.</li>
 </ul>

@@ -76,13 +76,41 @@ class TaskbarSignals:
 
     def clickEvent(self, widget, e, window):
         if e.type == gdk.EventType.BUTTON_PRESS and e.button == MouseButtons.LEFT_BUTTON:
-            if not window.is_minimized():
-                window.minimize()
-            else:
+            if window.is_minimized():
                 window.activate(1)
+            else:
+                window.minimize()
         if e.type == gdk.EventType.BUTTON_PRESS and e.button == MouseButtons.RIGHT_BUTTON:
             self.window = window
+            self.setTaskbarMenuStates()
             self.taskbarMenu.show()
+
+    def setTaskbarMenuStates(self):
+        if not self.window.is_above(): # If above all windows
+            self.builder.get_object("alwaysOnTopToggle").set_active(False)
+        else:
+            self.builder.get_object("alwaysOnTopToggle").set_active(True)
+
+        if not self.window.is_below(): # If below all windows
+            self.builder.get_object("alwaysBelowToggle").set_active(False)
+        else:
+            self.builder.get_object("alwaysBelowToggle").set_active(True)
+
+        if not self.window.is_pinned(): # If visable on all workspaces
+            self.builder.get_object("alwaysOnVisableWorkspace").set_active(False)
+        else:
+            self.builder.get_object("alwaysOnVisableWorkspace").set_active(True)
+
+        if not self.window.is_sticky(): # If visable on all workspaces??
+            pass
+        else:
+            pass
+
+        if not self.window.is_active(): # If window has focus
+            pass
+        else:
+            pass
+
 
     def hideTaskbarMenu(self, widget, eve):
         widget.hide()
