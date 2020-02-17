@@ -86,20 +86,30 @@ class TaskbarSignals:
             self.taskbarMenu.show()
 
     def setTaskbarMenuStates(self):
-        if not self.window.is_above(): # If above all windows
-            self.builder.get_object("alwaysOnTopToggle").set_active(False)
-        else:
-            self.builder.get_object("alwaysOnTopToggle").set_active(True)
+        alwaysOnTopToggle        = self.builder.get_object("alwaysOnTopToggle")
+        alwaysBelowToggle        = self.builder.get_object("alwaysBelowToggle")
+        alwaysOnVisableWorkspace = self.builder.get_object("alwaysOnVisableWorkspace")
 
-        if not self.window.is_below(): # If below all windows
-            self.builder.get_object("alwaysBelowToggle").set_active(False)
+        if self.window.is_above(): # If above all windows
+            if not alwaysOnTopToggle.get_active():
+                alwaysOnTopToggle.set_active(True)
         else:
-            self.builder.get_object("alwaysBelowToggle").set_active(True)
+            if alwaysOnTopToggle.get_active():
+                alwaysOnTopToggle.set_active(False)
 
-        if not self.window.is_pinned(): # If visable on all workspaces
-            self.builder.get_object("alwaysOnVisableWorkspace").set_active(False)
+        if self.window.is_below(): # If below all windows
+            if not alwaysBelowToggle.get_active():
+                alwaysBelowToggle.set_active(True)
         else:
-            self.builder.get_object("alwaysOnVisableWorkspace").set_active(True)
+            if alwaysBelowToggle.get_active():
+                alwaysBelowToggle.set_active(False)
+
+        if self.window.is_pinned(): # If visable on all workspaces
+            if not alwaysOnVisableWorkspace.get_active():
+                alwaysOnVisableWorkspace.set_active(True)
+        else:
+            if alwaysOnVisableWorkspace.get_active():
+                alwaysOnVisableWorkspace.set_active(False)
 
         if not self.window.is_sticky(): # If visable on all workspaces??
             pass
@@ -168,19 +178,19 @@ class TaskbarSignals:
     def startResizeWindow(self, widget, data=None):
         self.window.keyboard_size()
 
-    def setTopState(self, widget):
+    def setTopState(self, widget, eve):
         if not self.window.is_above():
             self.window.make_above()
         else:
             self.window.unmake_above()
 
-    def setBelowState(self, widget):
+    def setBelowState(self, widget, eve):
         if not self.window.is_above():
             self.window.make_below()
         else:
             self.window.unmake_below()
 
-    def setWorkspacePin(self, widget):
+    def setWorkspacePin(self, widget, eve):
         if not self.window.is_pinned():
             self.window.pin()
         else:

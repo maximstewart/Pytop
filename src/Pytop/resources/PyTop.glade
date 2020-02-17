@@ -227,7 +227,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="setTopState" swapped="no"/>
+            <signal name="button-release-event" handler="setTopState" swapped="no"/>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -242,7 +242,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="setBelowState" swapped="no"/>
+            <signal name="button-release-event" handler="setBelowState" swapped="no"/>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -257,7 +257,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="setWorkspacePin" swapped="no"/>
+            <signal name="button-release-event" handler="setWorkspacePin" swapped="no"/>
           </object>
           <packing>
             <property name="expand">True</property>
