@@ -1,3 +1,6 @@
+# Python imports
+import threading
+
 # Gtk imports
 import gi
 gi.require_version('Gtk', '3.0')
@@ -9,9 +12,6 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
 from gi.repository import GLib
 
-
-# Python imports
-import threading
 
 # Application imports
 
@@ -54,17 +54,22 @@ class TaskbarSignals:
             if workspace and w.get_workspace():
                 wnum = w.get_workspace().get_number()
                 if not w.is_skip_pager() and not w.is_skip_tasklist() and wnum == self.actv_workspace_num:
-                    btn = self.createWinBttn(w)
-                    self.setupSignals(btn, w)
-                    self.taskBarButtons.add(btn)
-
-    def setupSignals(self, btn, win):
-        btn.connect("button-press-event", self.clickEvent, (win))
+                    self.createWinLink(w)
 
     def setScreenSignals(self):
         self.SCREEN.connect("active-workspace-changed", self.activeWorkspaceChanged)
         self.SCREEN.connect("window-opened", self.windowOpened)
         self.SCREEN.connect("window-closed", self.windowClosed)
+
+    def createWinLink(self, w):
+        btn = self.createWinBttn(w)
+        self.setupSignals(btn, w)
+        self.taskBarButtons.add(btn)
+
+    def setupSignals(self, btn, win):
+        btn.connect("button-press-event", self.clickEvent, (win))
+        win.connect("name_changed", self.windowNameChanged, (btn))
+        win.connect("workspace_changed", self.windowWorkspaceChanged, (btn))
 
     def createWinBttn(self, w):
         btn = gtk.Button(label=w.get_name(), always_show_image=True)
@@ -123,7 +128,7 @@ class TaskbarSignals:
 
 
     def hideTaskbarMenu(self, widget, eve):
-        widget.hide()
+        self.taskbarMenu.hide()
 
     def setPagerWidget(self):
         pager = wnck.Pager()
@@ -139,16 +144,26 @@ class TaskbarSignals:
         self.SCREEN.force_update() # (Re)populate screen windows list
         self.refreashTaskbar()
 
+    def windowClosed(self, screen, window):
+        self.clearChildren(self.taskBarButtons)
+        self.SCREEN.force_update() # (Re)populate screen windows list
+        self.refreashTaskbar()
+
     def windowOpened(self, screen, window):
         self.SCREEN.force_update() # (Re)populate screen windows list
         btn = self.createWinBttn(window)
         self.setupSignals(btn, window)
         self.taskBarButtons.add(btn)
 
-    def windowClosed(self, screen, window):
-        self.clearChildren(self.taskBarButtons)
-        self.SCREEN.force_update() # (Re)populate screen windows list
-        self.refreashTaskbar()
+    def windowNameChanged(self, win, btn):
+        btn.set_label(win.get_name())
+
+    def windowWorkspaceChanged(self, win, btn):
+        wnum = win.get_workspace().get_number()
+        if self.actv_workspace_num == wnum:
+            btn.show()
+        else:
+            btn.hide()
 
     def clearChildren(self, parent):
         children = parent.get_children();
@@ -198,6 +213,7 @@ class TaskbarSignals:
 
     def closeAppWindow(self, widget, data=None):
         self.window.close(1)
+        self.hideTaskbarMenu(None, None)
 
 
         # WINDOW_SIGNALS
