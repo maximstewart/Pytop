@@ -13,7 +13,7 @@ import os, json
 
 
 class Settings:
-    def __init__(self):
+    def __init__(self, monIndex = 0):
         self.builder            = None
 
         # 'Filters'
@@ -33,6 +33,7 @@ class Settings:
         self.iconContainerWxH   = [128, 128]
         self.systemIconImageWxH = [56, 56]
         self.viIconWxH          = [256, 128]
+        self.monitors           = None
 
         self.DEFAULTCOLOR     = gdk.RGBA(0.0, 0.0, 0.0, 0.0)   # ~#00000000
         self.MOUSEOVERCOLOR   = gdk.RGBA(0.0, 0.9, 1.0, 0.64)  # ~#00e8ff
@@ -53,7 +54,7 @@ class Settings:
         self.GTK_ORIENTATION  = 1   # HORIZONTAL (0) VERTICAL (1)
 
         configFolder    = os.path.expanduser('~') + "/.config/pytop/"
-        self.configFile = configFolder + "settings.ini"
+        self.configFile = configFolder + "mon_" + str(monIndex) + "_settings.ini"
 
         if os.path.isdir(configFolder) == False:
             os.mkdir(configFolder)
@@ -98,8 +99,8 @@ class Settings:
         styleContext.add_provider_for_screen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         window.set_app_paintable(True)
-        monitors = self.getMonitorData(screen)
-        window.resize(monitors[0].width, monitors[0].height)
+        self.monitors = self.getMonitorData(screen)
+        window.resize(self.monitors[0].width, self.monitors[0].height)
 
     def getMonitorData(self, screen):
         monitors = []
@@ -107,7 +108,7 @@ class Settings:
             monitors.append(screen.get_monitor_geometry(m))
 
         for monitor in monitors:
-            print(str(monitor.width) + "x" + str(monitor.height) + "+" + str(monitor.x) + "+" + str(monitor.y))
+            print(str(monitor.width) + "+" + str(monitor.height) + "+" + str(monitor.x) + "+" + str(monitor.y))
 
         return monitors
 
@@ -123,6 +124,10 @@ class Settings:
         with open(self.configFile, 'w') as outfile:
             json.dump(data, outfile)
 
+
+
+    def returnMonitorsInfo(self):
+        return self.monitors
 
     def returnSettings(self):
         returnData = []

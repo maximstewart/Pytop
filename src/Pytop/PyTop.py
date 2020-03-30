@@ -27,7 +27,33 @@ class Main:
         builder  = gtk.Builder()
         settings = Settings()
         settings.attachBuilder(builder)
+        self.connectBuilder(settings, builder)
 
+        window   = settings.createWindow()
+        window.fullscreen()
+        window.show()
+
+        monitors = settings.returnMonitorsInfo()
+        i = 1
+        if len(monitors) > 1:
+            for mon in monitors[1:]:
+                subBuilder  = gtk.Builder()
+                subSettings = Settings(i)
+                subSettings.attachBuilder(subBuilder)
+                self.connectBuilder(subSettings, subBuilder)
+
+                win = subSettings.createWindow()
+                win.set_default_size(mon.width, mon.height)
+                win.set_size_request(mon.width, mon.height)
+                win.set_resizable(False)
+
+
+                win.move(mon.x, mon.y)
+                win.show()
+                i += 1
+
+
+    def connectBuilder(self, settings, builder):
         # Gets the methods from the classes and sets to handler.
         # Then, builder connects to any signals it needs.
         classes  = [CrossClassSignals(settings),
@@ -40,9 +66,6 @@ class Main:
             handlers.update(methods)
 
         builder.connect_signals(handlers)
-        window = settings.createWindow()
-        window.fullscreen()
-        window.show_all()
 
 
 if __name__ == "__main__":

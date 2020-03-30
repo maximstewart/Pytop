@@ -27,21 +27,24 @@ class TaskbarSignals:
     def setPagerWidget(self):
         pager = wnck.Pager()
 
-        pager.set_orientation(self.orientation)
         if self.orientation == 0:
             self.builder.get_object('taskBarWorkspacesHor').add(pager)
         else:
             self.builder.get_object('taskBarWorkspacesVer').add(pager)
 
+        pager.show()
+
 
     def setTasklistWidget(self):
-        barBtns = wnck.Tasklist()
-        barBtns.set_scroll_enabled(False)
-        barBtns.set_button_relief(2)  # 0 = normal relief, 2 = no relief
-        barBtns.set_grouping(1)       # 0 = mever group, 1 auto group, 2 = always group
+        tasklist = wnck.Tasklist()
+        tasklist.set_scroll_enabled(False)
+        tasklist.set_button_relief(2)  # 0 = normal relief, 2 = no relief
+        tasklist.set_grouping(1)       # 0 = mever group, 1 auto group, 2 = always group
 
-        barBtns.set_orientation(self.orientation)
+        tasklist.set_orientation(self.orientation)
         if self.orientation == 0:
-            self.builder.get_object('taskBarButtonsHor').add(barBtns)
+            self.builder.get_object('taskBarButtonsHor').add(tasklist)
         else:
-            self.builder.get_object('taskBarButtonsVer').add(barBtns)
+            self.builder.get_object('taskBarButtonsVer').add(tasklist)
+
+        tasklist.show()
