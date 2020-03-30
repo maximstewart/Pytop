@@ -12,6 +12,8 @@ import os, subprocess, hashlib, threading
 from os.path import isdir, isfile, join
 
 # Application imports
+from .icon_manager import easybuttons
+
 
 
 def threaded(fn):
@@ -91,7 +93,6 @@ class Icon:
         try:
             xdgObj      = DesktopEntry(fullPath)
             icon        = xdgObj.getIcon()
-            iconsDirs   = "/usr/share/icons"
             altIconPath = ""
 
             if "steam" in icon:
@@ -128,6 +129,8 @@ class Icon:
             elif os.path.exists(icon):
                 return self.createScaledImage(icon, self.systemIconImageWH)
             else:
+                # return easybuttons.IconManager().getIcon(icon, 64)
+                iconsDirs = "/usr/share/icons"
                 for (dirpath, dirnames, filenames) in os.walk(iconsDirs):
                     for file in filenames:
                         appNM = "application-x-" + icon

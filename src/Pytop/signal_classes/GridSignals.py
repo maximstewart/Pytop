@@ -27,7 +27,6 @@ class GridSignals:
         # Add filter to allow only folders to be selected
         selectDirDialog.add_filter(filefilter)
         selectDirDialog.set_filename(self.currentPath)
-        print(selectDirDialog.get_filename())
         self.setNewDirectory(selectDirDialog)
 
 
@@ -35,9 +34,7 @@ class GridSignals:
         newPath       = widget.get_filename()
         self.gridClss = Grid(self.gridObj, self.settings)
         self.gridClss.setNewDirectory(newPath)
-
-        if not "~/Desktop/" in newPath:
-            self.settings.saveSettings(newPath)
+        self.settings.saveSettings(newPath)
 
 
     # File control events
