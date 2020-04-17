@@ -11,3 +11,6 @@ Set taskbar menu option based on window options.
 <ul>
 <li>Detect window title changes</li>
 </ul>
+
+# Images
+![1 Pytop Desktop showing Home directory. ](images/pic1.png)
