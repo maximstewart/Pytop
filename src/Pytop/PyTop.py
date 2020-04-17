@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 
+# Python imports
+import inspect
+
+from setproctitle import setproctitle
+
 # Gtk imports
 import gi, faulthandler, signal
 gi.require_version('Gtk', '3.0')
@@ -8,14 +13,9 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
 from gi.repository import GLib
 
-# Python imports
-import inspect
-
-from setproctitle import setproctitle
-
 # Application imports
 from utils import Settings
-from signal_classes import CrossClassSignals, GridSignals, TaskbarSignals
+from signal_classes import CrossClassSignals, GridSignals, TaskbarSignals, DrawSignals
 
 
 class Main:
@@ -58,7 +58,8 @@ class Main:
         # Then, builder connects to any signals it needs.
         classes  = [CrossClassSignals(settings),
                     GridSignals(settings),
-                    TaskbarSignals(settings)]
+                    TaskbarSignals(settings),
+                    DrawSignals(settings)]
 
         handlers = {}
         for c in classes:
