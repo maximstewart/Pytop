@@ -37,20 +37,22 @@ class FileHandler:
 
     def openFile(self, file):
         print("Opening: " + file)
+        DEVNULL = open(os.devnull, 'w')
+
         if file.lower().endswith(self.vids):
-            subprocess.Popen([self.MEDIAPLAYER, self.MPV_WH, file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen([self.MEDIAPLAYER, self.MPV_WH, file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
         elif file.lower().endswith(self.music):
-            subprocess.Popen([self.MUSICPLAYER, file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen([self.MUSICPLAYER, file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
         elif file.lower().endswith(self.images):
-            subprocess.Popen([self.IMGVIEWER, file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen([self.IMGVIEWER, file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
         elif file.lower().endswith(self.txt):
-            subprocess.Popen([self.TEXTVIEWER, file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen([self.TEXTVIEWER, file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
         elif file.lower().endswith(self.pdf):
-            subprocess.Popen([self.PDFVIEWER, file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen([self.PDFVIEWER, file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
         elif file.lower().endswith(self.office):
-            subprocess.Popen([self.OFFICEPROG, file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen([self.OFFICEPROG, file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
         else:
-            subprocess.Popen(['xdg-open', file], stdout=subprocess.PIPE, close_fds=True)
+            subprocess.Popen(['xdg-open', file], start_new_session=True, stdout=DEVNULL, stderr=DEVNULL, close_fds=True)
 
 
     def create(self, name, type):
