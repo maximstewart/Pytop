@@ -255,14 +255,22 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="timeLabel">
-                <property name="width_request">126</property>
+              <object class="GtkEventBox" id="timeLabelEveBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="track_visited_links">False</property>
-                <attributes>
-                  <attribute name="scale" value="1.5"/>
-                </attributes>
+                <property name="above_child">True</property>
+                <signal name="button-release-event" handler="toggleCalPopover" swapped="no"/>
+                <child>
+                  <object class="GtkLabel" id="timeLabel">
+                    <property name="width_request">126</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="track_visited_links">False</property>
+                    <attributes>
+                      <attribute name="scale" value="1.5"/>
+                    </attributes>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -277,6 +285,22 @@
             <property name="position">3</property>
           </packing>
         </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkPopover" id="calendarPopup">
+    <property name="width_request">420</property>
+    <property name="height_request">225</property>
+    <property name="can_focus">False</property>
+    <property name="relative_to">timeLabelEveBox</property>
+    <property name="modal">False</property>
+    <child>
+      <object class="GtkCalendar" id="calendarWid">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="year">2020</property>
+        <property name="month">3</property>
+        <property name="day">22</property>
       </object>
     </child>
   </object>

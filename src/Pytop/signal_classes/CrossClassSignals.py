@@ -19,9 +19,7 @@ class CrossClassSignals:
     # Displays Timer
     def displayclock(self):
         now     = datetime.now()
-
-        # timeStr = now.strftime("%H:%M %m/%d/%y")
-        timeStr = now.strftime("%I:%M %p  %m/%d/%y")
+        timeStr = now.strftime("%I:%M %p  %m/%d/%Y")
         self.timeLabel.set_label(timeStr)
         return True
 

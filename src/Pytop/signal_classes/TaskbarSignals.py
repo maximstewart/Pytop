@@ -1,5 +1,6 @@
 # Python imports
 import threading
+from datetime import datetime
 
 # Gtk imports
 import gi
@@ -23,6 +24,23 @@ class TaskbarSignals:
 
         self.setPagerWidget()
         self.setTasklistWidget()
+
+    def toggleCalPopover(self, widget, eve):
+        calendarPopup = self.builder.get_object('calendarPopup')
+        if (calendarPopup.get_visible() == False):
+            calendarWid = self.builder.get_object('calendarWid')
+            now         = datetime.now()
+            timeStr     = now.strftime("%m/%d/%Y")
+            parts       = timeStr.split("/")
+            month       = int(parts[0])
+            day         = int(parts[1])
+            year        = int(parts[2])
+            calendarWid.select_day(day)
+            calendarWid.select_month(month, year)
+            calendarPopup.popup()
+        else:
+            calendarPopup.popdown()
+
 
     def setPagerWidget(self):
         pager = wnck.Pager()

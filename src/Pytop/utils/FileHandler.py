@@ -62,7 +62,7 @@ class FileHandler:
             else:                # Create Folder
                 os.mkdir(name)
         except Exception as e:
-            print(e)
+            print( repr(e) )
             return 1
 
         return 0
@@ -86,7 +86,7 @@ class FileHandler:
                     shutil.move(finalForm, toPath)
 
         except Exception as e:
-            print(e)
+            print( repr(e) )
             return 1
 
         return 0
@@ -106,7 +106,7 @@ class FileHandler:
                     return 1
         except Exception as e:
             print("An error occured deleting the file:")
-            print(e)
+            print( repr(e) )
             return 1
 
         return 0
@@ -129,7 +129,7 @@ class FileHandler:
                     print("The folder/file does not exist")
                     return 1
         except Exception as e:
-            print(e)
+            print( repr(e) )
             return 1
 
         return 0
@@ -144,7 +144,7 @@ class FileHandler:
                 print("The folder/file does not exist")
                 return 1
         except Exception as e:
-            print(e)
+            print( repr(e) )
             return 1
 
         return 0
