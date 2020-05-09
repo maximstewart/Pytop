@@ -8,7 +8,7 @@ Pytop is a Python + Gtk+ application to have a custom desktop interface.
 n/a
 
 # TODO
-add a program menu dropdown button. (Can use much of Shellmen's code.)
+* Add a program menu dropdown button. (Can use much of Shellmen's code.)
 
 # Images
 ![1 Pytop Desktop showing Home directory. ](images/pic1.png)
