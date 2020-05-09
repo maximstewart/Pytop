@@ -2,13 +2,13 @@
 from datetime import datetime
 
 # Gtk imports
-from gi.repository import GObject
+
 
 # Application imports
 from mixins import CPUDrawMixin, TaskbarMixin
 
 
-class CrossClassSignals(CPUDrawMixin, TaskbarMixin):
+class Signals(CPUDrawMixin, TaskbarMixin):
     def __init__(self, settings):
         self.settings       = settings
         self.builder        = self.settings.returnBuilder()
@@ -18,10 +18,8 @@ class CrossClassSignals(CPUDrawMixin, TaskbarMixin):
         self.brushSizeProp  = self.builder.get_object("brushSizeProp")
         self.brushColorProp = self.builder.get_object("brushColorProp")
 
-        # Menu bar setup
+        # Menu bar setup - Note: Must be before setting clock
         self.orientation = 1  # 0 = horizontal, 1 = vertical
-
-        # Must be before setting clock
         self.setPagerWidget()
         self.setTasklistWidget()
 
@@ -47,23 +45,3 @@ class CrossClassSignals(CPUDrawMixin, TaskbarMixin):
         self.good             = [0.53, 0.8, 0.15, 1.0]
         self.warning          = [1.0, 0.66, 0.0, 1.0]
         self.danger           = [1.0, 0.0, 0.0, 1.0]
-
-
-
-
-    # Displays Timer
-    def displayclock(self):
-        now = datetime.now()
-        hms = now.strftime("%I:%M %p")
-        mdy = now.strftime("%m/%d/%Y")
-        timeStr = hms + "\n" + mdy
-        self.timeLabel.set_label(timeStr)
-        return True
-
-    # Starting or clock
-    def startClock(self):
-        GObject.timeout_add(59000, self.displayclock)
-
-
-    def closePopup(self, widget, data=None):
-        widget.hide()

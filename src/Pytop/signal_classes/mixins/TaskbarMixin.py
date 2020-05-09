@@ -12,6 +12,7 @@ from gi.repository import Wnck as wnck
 from gi.repository import Gtk as gtk
 from gi.repository import Gdk as gdk
 from gi.repository import GLib
+from gi.repository import GObject
 
 # Application imports
 
@@ -69,3 +70,21 @@ class TaskbarMixin:
             self.builder.get_object('taskBarButtonsVer').add(tasklist)
 
         tasklist.show()
+
+
+    # Displays Timer
+    def displayclock(self):
+        now = datetime.now()
+        hms = now.strftime("%I:%M %p")
+        mdy = now.strftime("%m/%d/%Y")
+        timeStr = hms + "\n" + mdy
+        self.timeLabel.set_label(timeStr)
+        return True
+
+    # Starting or clock
+    def startClock(self):
+        GObject.timeout_add(59000, self.displayclock)
+
+
+    def closePopup(self, widget, data=None):
+        widget.hide()

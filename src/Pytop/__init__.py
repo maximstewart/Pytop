@@ -15,7 +15,7 @@ from gi.repository import GLib
 
 # Application imports
 from utils import Settings
-from signal_classes import CrossClassSignals, GridSignals
+from signal_classes import Signals, GridSignals
 
 
 class Main:
@@ -56,7 +56,7 @@ class Main:
     def connectBuilder(self, settings, builder):
         # Gets the methods from the classes and sets to handler.
         # Then, builder connects to any signals it needs.
-        classes  = [CrossClassSignals(settings),
+        classes  = [Signals(settings),
                     GridSignals(settings)]
 
         handlers = {}
