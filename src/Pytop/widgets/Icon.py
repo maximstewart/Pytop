@@ -58,7 +58,7 @@ class Icon:
             return thumbnl
         except Exception as e:
             print("Thumbnail generation issue:")
-            print(e)
+            print( repr(e) )
             return gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
 
 
@@ -85,7 +85,7 @@ class Icon:
             return thumbnl
         except Exception as e:
             print("Icon generation issue:")
-            print(e)
+            print( repr(e) )
             return gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
 
 
@@ -141,7 +141,7 @@ class Icon:
                 return self.createScaledImage(altIconPath, self.systemIconImageWH)
         except Exception as e:
             print(".desktop icon generation issue:")
-            print(e)
+            print( repr(e) )
             return None
 
 
@@ -162,7 +162,7 @@ class Icon:
                 return None
         except Exception as e:
             print("system icon generation issue:")
-            print(e)
+            print( repr(e) )
             return None
 
 
@@ -173,7 +173,7 @@ class Icon:
             return gtk.Image.new_from_pixbuf(scaledPixBuf)
         except Exception as e:
             print("Image Scaling Issue:")
-            print(e)
+            print( repr(e) )
             return None
 
     def generateVideoThumbnail(self, fullPath, hashImgPth):
@@ -209,4 +209,4 @@ class Icon:
             proc.wait()
         except Exception as e:
             print("Video thumbnail generation issue in thread:")
-            print(e)
+            print( repr(e) )

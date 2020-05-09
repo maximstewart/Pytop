@@ -19,7 +19,7 @@ from signal_classes import CrossClassSignals, GridSignals, TaskbarSignals, DrawS
 
 
 class Main:
-    def __init__(self):
+    def __init__(self, args):
         setproctitle('Pytop')
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, gtk.main_quit)
         faulthandler.enable()  # For better debug info
@@ -74,4 +74,4 @@ if __name__ == "__main__":
         main = Main()
         gtk.main()
     except Exception as e:
-        print(e)
+        print( repr(e) )

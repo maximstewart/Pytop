@@ -18,8 +18,10 @@ class CrossClassSignals:
 
     # Displays Timer
     def displayclock(self):
-        now     = datetime.now()
-        timeStr = now.strftime("%I:%M %p  %m/%d/%Y")
+        now = datetime.now()
+        hms = now.strftime("%I:%M %p")
+        mdy = now.strftime("%m/%d/%Y")
+        timeStr = hms + "\n" + mdy
         self.timeLabel.set_label(timeStr)
         return True
 

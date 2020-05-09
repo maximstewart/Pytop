@@ -111,7 +111,7 @@ class DrawSignals:
         ah           = area.get_allocated_height()
         self.aw      = aw
         self.ah      = ah
-        self.xStep   = aw / 200  # For x-axis 60 * 2 per 1 sec steps
+        self.xStep   = aw / 200  # For x-axis
         self.yStep   = ah / 100 # For y-axis %s
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, aw, ah)
         self.brush   = cairo.Context(self.surface)

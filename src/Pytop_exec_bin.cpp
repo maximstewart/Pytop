@@ -5,6 +5,6 @@ using namespace std;
 
 int main() {
     chdir("/opt/Pytop/");
-    system("python3 PyTop.py");
+    system("python3 .");
 return 0;
 }

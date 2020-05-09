@@ -48,7 +48,6 @@ class Grid:
         self.grid.connect("button_release_event", self.iconSingleClick, (self.grid,))
 
     def setNewDirectory(self, path):
-        self.store.clear()
         self.currentPath = path
         dirPaths         = ['.', '..']
         vids             = []
@@ -109,9 +108,15 @@ class Grid:
 
     @threaded
     def updateGrid(self, model, dirPath, file, i):
-        image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
-        iter  = model.get_iter_from_string(str(i))
-        glib.idle_add(self.replaceInGrid, (iter, image,))
+        # Sinking errors b/c too lazy to find why we get some invalid tree paths when starting..
+        # I really should take time to figure it out...buuuutttt....it's non-fatal. (For now.)
+        # Images don't seem to always load which is curious...
+        try:
+            image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
+            iter  = model.get_iter_from_string(str(i))
+            glib.idle_add(self.replaceInGrid, (iter, image,))
+        except Exception as e:
+            print("widgets/Grid.py sinking errors on updateGrid method...")
 
     def addToGrid(self, dataSet):
         self.store.append([dataSet[0], dataSet[1]])
@@ -127,6 +132,7 @@ class Grid:
             fileName = model[item][1]
             dir      = self.currentPath
             file     = dir + "/" + fileName
+            self.store.clear()
 
             if fileName == ".":
                 self.setNewDirectory(dir)

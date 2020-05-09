@@ -16,6 +16,13 @@ from gi.repository import GLib
 # Application imports
 
 
+
+class MouseButton:
+    LEFT_BUTTON   = 1
+    MIDDLE_BUTTON = 2
+    RIGHT_BUTTON  = 3
+
+
 class TaskbarSignals:
     def __init__(self, settings):
         self.settings = settings
@@ -32,7 +39,7 @@ class TaskbarSignals:
             now         = datetime.now()
             timeStr     = now.strftime("%m/%d/%Y")
             parts       = timeStr.split("/")
-            month       = int(parts[0])
+            month       = int(parts[0]) - 1
             day         = int(parts[1])
             year        = int(parts[2])
             calendarWid.select_day(day)
@@ -41,6 +48,10 @@ class TaskbarSignals:
         else:
             calendarPopup.popdown()
 
+
+    def showSystemStats(self, widget, eve):
+        if eve.type == gdk.EventType.BUTTON_RELEASE and eve.button == MouseButton.RIGHT_BUTTON:
+            self.builder.get_object('systemStats').popup()
 
     def setPagerWidget(self):
         pager = wnck.Pager()

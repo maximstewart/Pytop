@@ -15,6 +15,7 @@ import os, json
 class Settings:
     def __init__(self, monIndex = 0):
         self.builder            = None
+        self.SCRIPT_PTH = os.path.dirname(os.path.realpath(__file__)) + "/"
 
         # 'Filters'
         self.office = ('.doc', '.docx', '.xls', '.xlsx', '.xlt', '.xltx', '.xlm',
@@ -76,7 +77,7 @@ class Settings:
 
     def attachBuilder(self, builder):
         self.builder = builder
-        self.builder.add_from_file("resources/PyTop.glade")
+        self.builder.add_from_file(self.SCRIPT_PTH + "../resources/Main_Window.glade")
 
     def createWindow(self):
         # Get window and connect signals
@@ -93,7 +94,7 @@ class Settings:
 
         # bind css file
         cssProvider = gtk.CssProvider()
-        cssProvider.load_from_path('resources/stylesheet.css')
+        cssProvider.load_from_path(self.SCRIPT_PTH + '../resources/stylesheet.css')
         screen = gdk.Screen.get_default()
         styleContext = gtk.StyleContext()
         styleContext.add_provider_for_screen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
@@ -113,6 +114,10 @@ class Settings:
         return monitors
 
 
+    def returnMonitorsInfo(self):
+        return self.monitors
+
+
     def saveSettings(self, startPath):
         data = {}
         data['pytop_settings'] = []
@@ -124,10 +129,6 @@ class Settings:
         with open(self.configFile, 'w') as outfile:
             json.dump(data, outfile)
 
-
-
-    def returnMonitorsInfo(self):
-        return self.monitors
 
     def returnSettings(self):
         returnData = []
