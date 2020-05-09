@@ -207,7 +207,7 @@ class Icon:
             # Get frame roughly 35% through video
             grabTime = str( int( float( duration.split(".")[0] ) * 0.35) )
             command  = ["ffmpeg", "-ss", grabTime, "-an", "-i", fullPath, "-s", "320x180", "-vframes", "1", hashImgPth]
-            proc     = subprocess.Popen(command)
+            proc     = subprocess.Popen(command, stdout=subprocess.PIPE)
             proc.wait()
         except Exception as e:
             print("Video thumbnail generation issue in thread:")

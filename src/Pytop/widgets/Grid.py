@@ -1,3 +1,9 @@
+# Python imports
+import os, threading, time
+from os.path import isdir, isfile, join
+from os import listdir
+
+
 # Gtk imports
 import gi
 gi.require_version('Gtk', '3.0')
@@ -8,10 +14,6 @@ from gi.repository import Gdk as gdk
 from gi.repository import GLib as glib
 from gi.repository import GdkPixbuf
 
-# Python imports
-import os, threading, time
-from os.path import isdir, isfile, join
-from os import listdir
 
 # Application imports
 from .Icon import Icon
@@ -48,6 +50,7 @@ class Grid:
         self.grid.connect("button_release_event", self.iconSingleClick, (self.grid,))
 
     def setNewDirectory(self, path):
+        self.store.clear()
         self.currentPath = path
         dirPaths         = ['.', '..']
         vids             = []
@@ -99,7 +102,7 @@ class Grid:
 
         # Wait till we have a proper index...
         while len(self.store) < (start + 1):
-            time.sleep(.200)
+            time.sleep(.800)
 
         i = start
         for file in files:
@@ -108,14 +111,12 @@ class Grid:
 
     @threaded
     def updateGrid(self, model, dirPath, file, i):
-        # Sinking errors b/c too lazy to find why we get some invalid tree paths when starting..
-        # I really should take time to figure it out...buuuutttt....it's non-fatal. (For now.)
-        # Images don't seem to always load which is curious...
         try:
             image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
             iter  = model.get_iter_from_string(str(i))
             glib.idle_add(self.replaceInGrid, (iter, image,))
         except Exception as e:
+            # Errors seem to happen when fillVideoIcons index wait check is to low
             print("widgets/Grid.py sinking errors on updateGrid method...")
 
     def addToGrid(self, dataSet):
@@ -132,7 +133,6 @@ class Grid:
             fileName = model[item][1]
             dir      = self.currentPath
             file     = dir + "/" + fileName
-            self.store.clear()
 
             if fileName == ".":
                 self.setNewDirectory(dir)
