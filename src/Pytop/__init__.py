@@ -15,7 +15,7 @@ from gi.repository import GLib
 
 # Application imports
 from utils import Settings
-from signal_classes import CrossClassSignals, GridSignals, TaskbarSignals, DrawSignals
+from signal_classes import CrossClassSignals, GridSignals
 
 
 class Main:
@@ -57,9 +57,7 @@ class Main:
         # Gets the methods from the classes and sets to handler.
         # Then, builder connects to any signals it needs.
         classes  = [CrossClassSignals(settings),
-                    GridSignals(settings),
-                    TaskbarSignals(settings),
-                    DrawSignals(settings)]
+                    GridSignals(settings)]
 
         handlers = {}
         for c in classes:

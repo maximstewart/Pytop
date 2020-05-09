@@ -14,49 +14,14 @@ from gi.repository import GLib
 
 
 
-class DrawSignals:
-    def __init__(self, settings):
-        self.settings = settings
-        self.builder  = self.settings.returnBuilder()
-
-        self.drawArea         = self.builder.get_object("drawArea")
-        self.brushSizeProp    = self.builder.get_object("brushSizeProp")
-        self.brushColorProp   = self.builder.get_object("brushColorProp")
-        self.messageWidget    = self.builder.get_object("messageWidget")
-        self.messageLabel     = self.builder.get_object("messageLabel")
-
-        self.cpu_percents     = []
-        self.doDrawBackground = False
-        self.isDrawing        = False
-        self.surface          = None
-        self.aw               = None  # Draw area width
-        self.ah               = None  # Draw area height
-        self.xStep            = None  # For x-axis 60 sec steps
-        self.yStep            = None  # For y-axis %s
-
-        rgba                  = self.brushColorProp.get_rgba()
-        self.brushColorVal    = [rgba.red, rgba.green, rgba.blue, rgba.alpha]
-        self.brushSizeVal     = self.brushSizeProp.get_value()
-        self.updateSpeed      = 100 # 1 sec = 1000ms
-
-        self.success          = "#88cc27"
-        self.warning          = "#ffa800"
-        self.error            = "#ff0000"
-
-        self.good             = [0.53, 0.8, 0.15, 1.0]
-        self.warning          = [1.0, 0.66, 0.0, 1.0]
-        self.danger           = [1.0, 0.0, 0.0, 1.0]
-
-        # Note: y-axis on draw area goes from top to bottom when increasing.
-        # Need to do the math such that you subtract from max height to start from bottom to go up
-        # self.linePoints.append([1 * xStep, ah - (23 * yStep)]) # 23%
-        # self.linePoints.append([2 * xStep, ah - (60 * yStep)]) # 60%
-        # self.drawPointLine()
-        # del self.linePoints[0:1]
-        # self.linePoints.append([3 * xStep, ah - (44 * yStep)]) # 44%
-
-
-
+class CPUDrawMixin:
+    # Note: y-axis on draw area goes from top to bottom when increasing.
+    # Need to do the math such that you subtract from max height to start from bottom to go up
+    # self.linePoints.append([1 * xStep, ah - (23 * yStep)]) # 23%
+    # self.linePoints.append([2 * xStep, ah - (60 * yStep)]) # 60%
+    # self.drawPointLine()
+    # del self.linePoints[0:1]
+    # self.linePoints.append([3 * xStep, ah - (44 * yStep)]) # 44%
     def updateCPUPoints(self):
         # Clears screen when enough points exist and unshifts the
         # first point to keep fixed range

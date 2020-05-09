@@ -1,4 +1,4 @@
-from signal_classes.CrossClassSignals import CrossClassSignals
-from signal_classes.DrawSignals import DrawSignals
+from mixins import CPUDrawMixin
+from mixins import TaskbarMixin
 from signal_classes.GridSignals import GridSignals
-from signal_classes.TaskbarSignals import TaskbarSignals
+from signal_classes.CrossClassSignals import CrossClassSignals

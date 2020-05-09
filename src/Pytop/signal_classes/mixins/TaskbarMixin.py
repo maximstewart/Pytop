@@ -23,15 +23,7 @@ class MouseButton:
     RIGHT_BUTTON  = 3
 
 
-class TaskbarSignals:
-    def __init__(self, settings):
-        self.settings = settings
-        self.builder  = self.settings.returnBuilder()
-        self.orientation = 1  # 0 = horizontal, 1 = vertical
-
-        self.setPagerWidget()
-        self.setTasklistWidget()
-
+class TaskbarMixin:
     def toggleCalPopover(self, widget, eve):
         calendarPopup = self.builder.get_object('calendarPopup')
         if (calendarPopup.get_visible() == False):
