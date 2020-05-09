@@ -4,32 +4,9 @@
 
 # Application imports
 from widgets import Grid
-from utils import Dragging
-from utils import FileHandler
 
 
-class GridSignals:
-    def __init__(self, settings):
-        self.settings      = settings
-        self.filehandler   = FileHandler(settings)
-
-        self.builder       = self.settings.returnBuilder()
-        self.gridObj       = self.builder.get_object("Desktop")
-        selectDirDialog    = self.builder.get_object("selectDirDialog")
-        filefilter         = self.builder.get_object("Folders")
-
-        self.currentPath   = self.settings.returnSettings()[0]
-        self.copyCutArry   = []
-        self.selectedFiles = []
-        self.gridClss      = None
-        self.pasteType     = 1  # copy == 1 and cut == 2
-
-        # Add filter to allow only folders to be selected
-        selectDirDialog.add_filter(filefilter)
-        selectDirDialog.set_filename(self.currentPath)
-        self.setNewDirectory(selectDirDialog)
-
-
+class GridMixin:
     def setNewDirectory(self, widget, data=None):
         newPath       = widget.get_filename()
         self.gridClss = Grid(self.gridObj, self.settings)

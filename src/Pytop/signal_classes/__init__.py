@@ -1,4 +1,4 @@
 from mixins import CPUDrawMixin
 from mixins import TaskbarMixin
-from signal_classes.GridSignals import GridSignals
+from mixins import GridMixin
 from signal_classes.Signals import Signals

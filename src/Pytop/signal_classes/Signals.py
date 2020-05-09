@@ -5,10 +5,11 @@ from datetime import datetime
 
 
 # Application imports
-from mixins import CPUDrawMixin, TaskbarMixin
+from mixins import CPUDrawMixin, TaskbarMixin, GridMixin
+from utils import FileHandler
 
 
-class Signals(CPUDrawMixin, TaskbarMixin):
+class Signals(CPUDrawMixin, TaskbarMixin, GridMixin):
     def __init__(self, settings):
         self.settings       = settings
         self.builder        = self.settings.returnBuilder()
@@ -45,3 +46,23 @@ class Signals(CPUDrawMixin, TaskbarMixin):
         self.good             = [0.53, 0.8, 0.15, 1.0]
         self.warning          = [1.0, 0.66, 0.0, 1.0]
         self.danger           = [1.0, 0.0, 0.0, 1.0]
+
+
+        # GridMixin Parts
+        self.filehandler   = FileHandler(settings)
+
+        self.builder       = self.settings.returnBuilder()
+        self.gridObj       = self.builder.get_object("Desktop")
+        selectDirDialog    = self.builder.get_object("selectDirDialog")
+        filefilter         = self.builder.get_object("Folders")
+
+        self.currentPath   = self.settings.returnSettings()[0]
+        self.copyCutArry   = []
+        self.selectedFiles = []
+        self.gridClss      = None
+        self.pasteType     = 1  # copy == 1 and cut == 2
+
+        # Add filter to allow only folders to be selected
+        selectDirDialog.add_filter(filefilter)
+        selectDirDialog.set_filename(self.currentPath)
+        self.setNewDirectory(selectDirDialog)
