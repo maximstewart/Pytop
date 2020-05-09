@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 # Application imports
-from mixins import CPUDrawMixin, TaskbarMixin, GridMixin
+from .mixins import CPUDrawMixin, TaskbarMixin, GridMixin
 from utils import FileHandler
 
 

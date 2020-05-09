@@ -1,3 +1,8 @@
+# Python Imports
+import os, subprocess, hashlib, threading
+from os.path import isdir, isfile, join
+
+
 # Gtk imports
 import gi
 gi.require_version('Gtk', '3.0')
@@ -7,9 +12,6 @@ from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
 from xdg.DesktopEntry import DesktopEntry
 
-# Python Imports
-import os, subprocess, hashlib, threading
-from os.path import isdir, isfile, join
 
 # Application imports
 from .icon_manager import easybuttons
