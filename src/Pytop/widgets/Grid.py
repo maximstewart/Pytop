@@ -46,6 +46,7 @@ class Grid:
         self.grid.set_model(self.store)
         self.grid.set_pixbuf_column(0)
         self.grid.set_text_column(1)
+        print("Grid generated...")
         self.grid.connect("item-activated", self.iconDblLeftClick)
         self.grid.connect("button_release_event", self.iconSingleClick, (self.grid,))
 
@@ -102,7 +103,7 @@ class Grid:
 
         # Wait till we have a proper index...
         while len(self.store) < (start + 1):
-            time.sleep(.800)
+            time.sleep(.650)
 
         i = start
         for file in files:

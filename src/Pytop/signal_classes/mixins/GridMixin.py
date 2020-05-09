@@ -3,13 +3,12 @@
 # Python imports
 
 # Application imports
-from widgets import Grid
 
 
 class GridMixin:
+    # different from the grid widget class'
     def setNewDirectory(self, widget, data=None):
         newPath       = widget.get_filename()
-        self.gridClss = Grid(self.gridObj, self.settings)
         self.gridClss.setNewDirectory(newPath)
         self.settings.saveSettings(newPath)
 

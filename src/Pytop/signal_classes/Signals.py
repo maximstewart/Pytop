@@ -6,7 +6,9 @@ from datetime import datetime
 
 # Application imports
 from .mixins import CPUDrawMixin, TaskbarMixin, GridMixin
+from widgets import Grid
 from utils import FileHandler
+
 
 
 class Signals(CPUDrawMixin, TaskbarMixin, GridMixin):
@@ -59,8 +61,9 @@ class Signals(CPUDrawMixin, TaskbarMixin, GridMixin):
         self.currentPath   = self.settings.returnSettings()[0]
         self.copyCutArry   = []
         self.selectedFiles = []
-        self.gridClss      = None
+        self.gridClss      = Grid(self.gridObj, self.settings)
         self.pasteType     = 1  # copy == 1 and cut == 2
+
 
         # Add filter to allow only folders to be selected
         selectDirDialog.add_filter(filefilter)
