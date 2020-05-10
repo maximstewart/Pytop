@@ -1,3 +1,11 @@
+/* Menu css properties */
+.menu_scroller label {
+    font-size: 120%;
+}
+
+
+/* Grid css properties */
+
 viewport,
 treeview,
 treeview > header,

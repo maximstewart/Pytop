@@ -80,6 +80,18 @@ class MainMenuMixin:
         button = gtk.Button(label=title)
         button.set_image(icon)
         button.connect("clicked", self.executeProgram)
+
+        children   = button.get_children()
+        alignment1 = children[0]
+        box        = alignment1.get_children()[0]
+        label      = box.get_children()[1]
+
+        alignment1.set(0.0, 0.0, 0.0, 0.0)
+        label.set_halign(1)
+        label.set_line_wrap(True)
+        label.set_max_width_chars(38)
+        label.set_size_request(640, 64)
+
         button.show_all()
         glib.idle_add(widget.add, (button))
 
