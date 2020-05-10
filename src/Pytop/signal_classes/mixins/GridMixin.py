@@ -6,7 +6,7 @@
 
 
 class GridMixin:
-    # different from the grid widget class'
+    # Calls the Grid widget class' method
     def setNewDirectory(self, widget, data=None):
         newPath       = widget.get_filename()
         self.gridClss.setNewDirectory(newPath)

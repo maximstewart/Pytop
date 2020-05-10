@@ -1,17 +1,19 @@
 # Python imports
 from datetime import datetime
+import os
 
 # Gtk imports
 
 
 # Application imports
-from .mixins import CPUDrawMixin, TaskbarMixin, GridMixin
+from .mixins import CPUDrawMixin, MainMenuMixin, TaskbarMixin, GridMixin
 from widgets import Grid
+from widgets import Icon
 from utils import FileHandler
 
 
 
-class Signals(CPUDrawMixin, TaskbarMixin, GridMixin):
+class Signals(CPUDrawMixin, MainMenuMixin, TaskbarMixin, GridMixin):
     def __init__(self, settings):
         self.settings       = settings
         self.builder        = self.settings.returnBuilder()
@@ -69,3 +71,18 @@ class Signals(CPUDrawMixin, TaskbarMixin, GridMixin):
         selectDirDialog.add_filter(filefilter)
         selectDirDialog.set_filename(self.currentPath)
         self.setNewDirectory(selectDirDialog)
+
+
+        # Program Menu Parts
+        self.menuWindow  = self.builder.get_object("menuWindow")
+        self.menuWindow.set_keep_above(True);
+
+        self.iconFactory = Icon(self.settings)
+        self.grpDefault  = "Accessories"
+        self.progGroup   = self.grpDefault
+        HOME_APPS        = os.path.expanduser('~') + "/.local/share/applications/"
+        paths            = ["/usr/share/applications/", HOME_APPS]
+        self.menuData    = self.getDesktopFilesInfo(paths)
+        self.desktopObjs = []
+        self.getSubgroup()
+        self.generateListView()

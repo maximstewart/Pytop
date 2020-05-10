@@ -14,7 +14,7 @@ from xdg.DesktopEntry import DesktopEntry
 
 
 # Application imports
-from .icon_manager import easybuttons
+
 
 
 
@@ -113,15 +113,6 @@ class Icon:
                 execStr   = xdgObj.getExec()
                 parts     = execStr.split("steam://rungameid/")
                 id        = parts[len(parts) - 1]
-
-                # NOTE: Can try this logic instead...
-                # if command exists use it instead of header image
-                # if "steamcmd app_info_print id":
-                #     proc = subprocess.Popen(["steamcmd", "app_info_print", id])
-                #     proc.wait()
-                # else:
-                #     use the bottom logic
-
                 imageLink = "https://steamcdn-a.akamaihd.net/steam/apps/" + id + "/header.jpg"
                 proc      = subprocess.Popen(["wget", "-O", hashImgPth, imageLink])
                 proc.wait()
@@ -131,20 +122,32 @@ class Icon:
             elif os.path.exists(icon):
                 return self.createScaledImage(icon, self.systemIconImageWH)
             else:
-                # return easybuttons.IconManager().getIcon(icon, 64)
-                iconsDirs = "/usr/share/icons"
-                for (dirpath, dirnames, filenames) in os.walk(iconsDirs):
-                    for file in filenames:
-                        appNM = "application-x-" + icon
-                        if appNM in file:
-                            altIconPath = dirpath + "/" + file
-                            break
+                iconsDirs   = ["/usr/share/pixmaps", self.usrHome + "/.icons", "/usr/share/icons" ,]
+                altIconPath = ""
+
+                for iconsDir in iconsDirs:
+                    altIconPath = self.traverseIconsFolder(iconsDir, icon)
+                    if altIconPath is not "":
+                        break
 
                 return self.createScaledImage(altIconPath, self.systemIconImageWH)
         except Exception as e:
             print(".desktop icon generation issue:")
             print( repr(e) )
             return None
+
+
+    def traverseIconsFolder(self, path, icon):
+        altIconPath = ""
+
+        for (dirpath, dirnames, filenames) in os.walk(path):
+            for file in filenames:
+                appNM = "application-x-" + icon
+                if icon in file or appNM in file:
+                    altIconPath = dirpath + "/" + file
+                    break
+
+        return altIconPath
 
 
     def getSystemThumbnail(self, filename, size):
