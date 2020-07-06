@@ -76,12 +76,13 @@ class Signals(CPUDrawMixin, MainMenuMixin, TaskbarMixin, GridMixin):
         # Program Menu Parts
         self.menuWindow  = self.builder.get_object("menuWindow")
         self.menuWindow.set_keep_above(True);
+        self.showIcons   = False
 
         self.iconFactory = Icon(self.settings)
         self.grpDefault  = "Accessories"
         self.progGroup   = self.grpDefault
         HOME_APPS        = os.path.expanduser('~') + "/.local/share/applications/"
-        paths            = ["/usr/share/applications/", HOME_APPS]
+        paths            = ["/opt/", "/usr/share/applications/", HOME_APPS]
         self.menuData    = self.getDesktopFilesInfo(paths)
         self.desktopObjs = []
         self.getSubgroup()

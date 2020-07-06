@@ -46,9 +46,8 @@ class Main:
                 win.set_default_size(mon.width, mon.height)
                 win.set_size_request(mon.width, mon.height)
                 win.set_resizable(False)
-
-
                 win.move(mon.x, mon.y)
+
                 win.show()
                 i += 1
 

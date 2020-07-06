@@ -90,7 +90,6 @@ class Icon:
             print( repr(e) )
             return gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
 
-
     def parseDesktopFiles(self, fullPath):
         try:
             xdgObj      = DesktopEntry(fullPath)
@@ -117,12 +116,12 @@ class Icon:
                 proc      = subprocess.Popen(["wget", "-O", hashImgPth, imageLink])
                 proc.wait()
 
-                # Use video sizes since headers are bigger
+                # Use video thumbnail sizes since headers are bigger
                 return self.createScaledImage(hashImgPth, self.viIconWH)
             elif os.path.exists(icon):
                 return self.createScaledImage(icon, self.systemIconImageWH)
             else:
-                iconsDirs   = ["/usr/share/pixmaps", self.usrHome + "/.icons", "/usr/share/icons" ,]
+                iconsDirs   = ["/usr/share/pixmaps", "/usr/share/icons", self.usrHome + "/.icons" ,]
                 altIconPath = ""
 
                 for iconsDir in iconsDirs:
@@ -180,6 +179,18 @@ class Icon:
             print("Image Scaling Issue:")
             print( repr(e) )
             return None
+
+    def createFromFile(self, path):
+        try:
+            return gtk.Image.new_from_file(path)
+        except Exception as e:
+            print("Image from file Issue:")
+            print( repr(e) )
+            return None
+
+    def returnGenericIcon(self):
+        return gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
+
 
     def generateVideoThumbnail(self, fullPath, hashImgPth):
         proc = None

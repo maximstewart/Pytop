@@ -71,8 +71,11 @@ class MainMenuMixin:
         for obj in self.desktopObjs:
             title   = obj[0]
             dirPath = obj[1]
-            image   = self.iconFactory.parseDesktopFiles(dirPath) # .get_pixbuf()
-            self.addToProgramListView(widget, title, image)
+            if self.showIcons:
+                image = self.iconFactory.parseDesktopFiles(dirPath) # .get_pixbuf()
+                self.addToProgramListView(widget, title, image)
+            else:
+                self.addToProgramListViewAsText(widget, title)
 
 
     @threaded
@@ -95,10 +98,27 @@ class MainMenuMixin:
         button.show_all()
         glib.idle_add(widget.add, (button))
 
+    @threaded
+    def addToProgramListViewAsText(self, widget, title):
+        button = gtk.Button(label=title)
+        button.connect("clicked", self.executeProgram)
+
+        children = button.get_children()
+        label    = children[0]
+
+        label.set_halign(1)
+        label.set_line_wrap(True)
+        label.set_max_width_chars(38)
+        label.set_size_request(640, 64)
+
+        button.show_all()
+        glib.idle_add(widget.add, (button))
+
 
     def executeProgram(self, widget):
         """
-            Need to refactor and pull out the sub loop that is used in both cases...
+            # TODO:
+                Need to refactor and pull out the sub loop that is used in both cases...
         """
         entry   = widget.get_label().strip()
         group   = self.progGroup
@@ -176,49 +196,59 @@ class MainMenuMixin:
         }
 
         for path in paths:
-            for f in listdir(path):
-                fPath = path + f
-                flags = ["mimeinfo.cache", "defaults.list"]
-                if not f in flags and isfile(fPath):
-                    xdgObj = DesktopEntry(fPath)
-
-                    title    = xdgObj.getName()
-                    groups   = xdgObj.getCategories()
-                    comment  = xdgObj.getComment()
-                    icon     = xdgObj.getIcon()
-                    mainExec = xdgObj.getExec()
-                    tryExec  = xdgObj.getTryExec()
-
-                    group    = ""
-                    if "Accessories" in groups or "Utility" in groups:
-                        group = "Accessories"
-                    elif "Multimedia" in groups or "Video" in groups or "Audio" in groups:
-                        group = "Multimedia"
-                    elif "Development" in groups:
-                        group = "Development"
-                    elif "Game" in groups:
-                        group = "Game"
-                    elif "Internet" in groups or "Network" in groups:
-                        group = "Internet"
-                    elif "Graphics" in groups:
-                        group = "Graphics"
-                    elif "Office" in groups:
-                        group = "Office"
-                    elif "System" in groups:
-                        group = "System"
-                    elif "Settings" in groups:
-                        group = "Settings"
-                    elif "Wine" in groups:
-                        group = "Wine"
-                    else:
-                        group = "Other"
-
-                    menuObjs[group].append( {"title":  title,   "groups": groups,
-                                            "comment": comment, "exec": mainExec,
-                                            "tryExec": tryExec, "fileName": f,
-                                            "filePath": fPath, "icon": icon})
+            if not "/opt/" in path:
+                self.listAndUpdateDesktopFiles(path, menuObjs);
+            else:
+                for folder in listdir(path):
+                    try:
+                        fPath = path + folder + "/"
+                        self.listAndUpdateDesktopFiles(fPath, menuObjs);
+                    except Exception as e:
+                        print( repr(e) )
 
         return menuObjs
+
+    def listAndUpdateDesktopFiles(self, path, menuObjs):
+        for f in listdir(path):
+            fPath = path + f
+            if isfile(fPath) and f.endswith(".desktop"):
+                xdgObj = DesktopEntry(fPath)
+
+                title    = xdgObj.getName()
+                groups   = xdgObj.getCategories()
+                comment  = xdgObj.getComment()
+                icon     = xdgObj.getIcon()
+                mainExec = xdgObj.getExec()
+                tryExec  = xdgObj.getTryExec()
+
+                group    = ""
+                if "Accessories" in groups or "Utility" in groups:
+                    group = "Accessories"
+                elif "Multimedia" in groups or "Video" in groups or "Audio" in groups:
+                    group = "Multimedia"
+                elif "Development" in groups:
+                    group = "Development"
+                elif "Game" in groups:
+                    group = "Game"
+                elif "Internet" in groups or "Network" in groups:
+                    group = "Internet"
+                elif "Graphics" in groups:
+                    group = "Graphics"
+                elif "Office" in groups:
+                    group = "Office"
+                elif "System" in groups:
+                    group = "System"
+                elif "Settings" in groups:
+                    group = "Settings"
+                elif "Wine" in groups:
+                    group = "Wine"
+                else:
+                    group = "Other"
+
+                menuObjs[group].append( {"title":  title,   "groups": groups,
+                                        "comment": comment, "exec": mainExec,
+                                        "tryExec": tryExec, "fileName": f,
+                                        "filePath": fPath, "icon": icon})
 
 
     def getSubgroup(self, query = ""):
