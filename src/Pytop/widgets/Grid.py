@@ -9,9 +9,10 @@ import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
-from gi.repository import Gtk as gtk
-from gi.repository import Gdk as gdk
-from gi.repository import GLib as glib
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GLib
+from gi.repository import Gio
 from gi.repository import GdkPixbuf
 
 
@@ -32,7 +33,7 @@ class Grid:
         self.settings        = settings
         self.fileHandler     = FileHandler(self.settings)
 
-        self.store           = gtk.ListStore(GdkPixbuf.Pixbuf, str)
+        self.store           = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.usrHome         = settings.returnUserHome()
         self.hideHiddenFiles = settings.isHideHiddenFiles()
         self.builder         = settings.returnBuilder()
@@ -86,45 +87,54 @@ class Grid:
 
         files = dirPaths + vids + images + desktop + files
         self.generateGridIcons(path, files)
-        self.fillVideoIcons(path, vids, len(dirPaths))
+
+
+    def generateGridIcons(self, dir, files):
+        icon = GdkPixbuf.Pixbuf.new_from_file(self.iconFactory.INTERNAL_ICON_PTH)
+        for i, file in enumerate(files):
+            self.store.append([icon, file])
+            self.create_icon(i, dir, file)
 
 
     @threaded
-    def generateGridIcons(self, dirPath, files):
-        for file in files:
-            image = self.iconFactory.createIcon(dirPath, file).get_pixbuf()
-            glib.idle_add(self.addToGrid, (image, file,))
+    def create_icon(self, i, dir, file):
+        icon  = self.iconFactory.createIcon(dir, file)
+        fpath = dir + "/" + file
+        GLib.idle_add(self.update_store, (i, icon, fpath,))
 
+    def update_store(self, item):
+        i, icon, fpath = item
+        itr  = self.store.get_iter(i)
 
-    @threaded
-    def fillVideoIcons(self, dirPath, files, start):
-        model = self.grid.get_model()
+        if not icon:
+            icon = self.get_system_thumbnail(fpath, self.iconFactory.systemIconImageWH[0])
+            if not icon:
+                if fpath.endswith(".gif"):
+                    icon = GdkPixbuf.PixbufAnimation.get_static_image(fpath)
+                else:
+                    icon = GdkPixbuf.Pixbuf.new_from_file(self.iconFactory.INTERNAL_ICON_PTH)
 
-        # Wait till we have a proper index...
-        while len(self.store) < (start + 1):
-            time.sleep(.650)
+        self.store.set_value(itr, 0, icon)
 
-        i = start
-        for file in files:
-            self.updateGrid(model, dirPath, file, i)
-            i += 1
-
-    @threaded
-    def updateGrid(self, model, dirPath, file, i):
+    def get_system_thumbnail(self, filename, size):
         try:
-            image = self.iconFactory.createThumbnail(dirPath, file).get_pixbuf()
-            iter  = model.get_iter_from_string(str(i))
-            glib.idle_add(self.replaceInGrid, (iter, image,))
+            if os.path.exists(filename):
+                gioFile   = Gio.File.new_for_path(filename)
+                info      = gioFile.query_info('standard::icon' , 0, Gio.Cancellable())
+                icon      = info.get_icon().get_names()[0]
+                iconTheme = Gtk.IconTheme.get_default()
+                iconData  = iconTheme.lookup_icon(icon , size , 0)
+                if iconData:
+                    iconPath  = iconData.get_filename()
+                    return GdkPixbuf.Pixbuf.new_from_file(iconPath)
+                else:
+                    return None
+            else:
+                return None
         except Exception as e:
-            # Errors seem to happen when fillVideoIcons index wait check is to low
-            print("widgets/Grid.py sinking errors on updateGrid method...")
-
-    def addToGrid(self, dataSet):
-        self.store.append([dataSet[0], dataSet[1]])
-
-    def replaceInGrid(self, dataSet):
-        # Iter, row column, new pixbuf...
-        self.store.set_value(dataSet[0], 0 , dataSet[1])
+            print("System icon generation issue:")
+            print( repr(e) )
+            return None
 
 
     def iconDblLeftClick(self, widget, item):

@@ -5,11 +5,9 @@ from os.path import isdir, isfile, join
 
 # Gtk imports
 import gi
-gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
-from gi.repository import Gtk as gtk
-from gi.repository import Gio as gio
+from gi.repository import GdkPixbuf
 from xdg.DesktopEntry import DesktopEntry
 
 
@@ -55,13 +53,13 @@ class Icon:
 
                 thumbnl = self.createScaledImage(hashImgPth, self.viIconWH)
                 if thumbnl == None: # If no icon whatsoever, return internal default
-                    thumbnl = gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
+                    thumbnl = GdkPixbuf.Pixbuf.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
 
             return thumbnl
         except Exception as e:
             print("Thumbnail generation issue:")
             print( repr(e) )
-            return gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
+            return GdkPixbuf.Pixbuf.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
 
 
     def getIconImage(self, file, fullPath):
@@ -70,25 +68,19 @@ class Icon:
 
             # Video icon
             if file.lower().endswith(self.vidsList):
-                thumbnl = gtk.Image.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
+                thumbnl = GdkPixbuf.Pixbuf.new_from_file(self.SCRIPT_PTH + "../resources/icons/video.png")
             # Image Icon
             elif file.lower().endswith(self.imagesList):
                 thumbnl = self.createScaledImage(fullPath, self.viIconWH)
             # .desktop file parsing
             elif fullPath.lower().endswith( ('.desktop',) ):
                 thumbnl = self.parseDesktopFiles(fullPath)
-            # System icons
-            else:
-                thumbnl = self.getSystemThumbnail(fullPath, self.systemIconImageWH[0])
-
-            if thumbnl == None: # If no icon whatsoever, return internal default
-                thumbnl = gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
 
             return thumbnl
         except Exception as e:
             print("Icon generation issue:")
             print( repr(e) )
-            return gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
+            return GdkPixbuf.Pixbuf.new_from_file(self.INTERNAL_ICON_PTH)
 
     def parseDesktopFiles(self, fullPath):
         try:
@@ -126,7 +118,7 @@ class Icon:
 
                 for iconsDir in iconsDirs:
                     altIconPath = self.traverseIconsFolder(iconsDir, icon)
-                    if altIconPath is not "":
+                    if altIconPath != "":
                         break
 
                 return self.createScaledImage(altIconPath, self.systemIconImageWH)
@@ -149,32 +141,11 @@ class Icon:
         return altIconPath
 
 
-    def getSystemThumbnail(self, filename, size):
-        try:
-            if os.path.exists(filename):
-                gioFile   = gio.File.new_for_path(filename)
-                info      = gioFile.query_info('standard::icon' , 0, gio.Cancellable())
-                icon      = info.get_icon().get_names()[0]
-                iconTheme = gtk.IconTheme.get_default()
-                iconData  = iconTheme.lookup_icon(icon , size , 0)
-                if iconData:
-                    iconPath  = iconData.get_filename()
-                    return gtk.Image.new_from_file(iconPath)  # This seems to cause a lot of core dump issues...
-                else:
-                    return None
-            else:
-                return None
-        except Exception as e:
-            print("system icon generation issue:")
-            print( repr(e) )
-            return None
-
-
     def createScaledImage(self, path, wxh):
         try:
-            pixbuf       = gtk.Image.new_from_file(path).get_pixbuf()
+            pixbuf       = GdkPixbuf.Pixbuf.new_from_file(path)
             scaledPixBuf = pixbuf.scale_simple(wxh[0], wxh[1], 2)  # 2 = BILINEAR and is best by default
-            return gtk.Image.new_from_pixbuf(scaledPixBuf)
+            return scaledPixBuf
         except Exception as e:
             print("Image Scaling Issue:")
             print( repr(e) )
@@ -182,14 +153,14 @@ class Icon:
 
     def createFromFile(self, path):
         try:
-            return gtk.Image.new_from_file(path)
+            return GdkPixbuf.Pixbuf.new_from_file(path)
         except Exception as e:
             print("Image from file Issue:")
             print( repr(e) )
             return None
 
     def returnGenericIcon(self):
-        return gtk.Image.new_from_file(self.INTERNAL_ICON_PTH)
+        return GdkPixbuf.Pixbuf.new_from_file(self.INTERNAL_ICON_PTH)
 
 
     def generateVideoThumbnail(self, fullPath, hashImgPth):
