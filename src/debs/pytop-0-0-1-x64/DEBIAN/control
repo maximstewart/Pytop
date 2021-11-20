@@ -1,0 +1,8 @@
+Package: pytop64
+Version: 0.0-1
+Section: python
+Priority: optional
+Architecture: amd64
+Depends: python3, wget, steamcmd, ffmpegthumbnailer (>= 2.0.10-0.1), gir1.2-wnck-1.0
+Maintainer: Maxim Stewart <1itdominator@gmail.com>
+Description: Pytop is a custom desktop GUI.
