@@ -59,7 +59,6 @@ class MainMenuMixin:
         self.generateListView()
 
 
-    @threaded
     def generateListView(self):
         widget = self.builder.get_object("programListBttns")
 
@@ -72,15 +71,25 @@ class MainMenuMixin:
             title   = obj[0]
             dirPath = obj[1]
             if self.showIcons:
-                image = self.iconFactory.parseDesktopFiles(dirPath) # .get_pixbuf()
-                self.addToProgramListView(widget, title, image)
+                self.update_view(widget, title, dirPath)
             else:
-                self.addToProgramListViewAsText(widget, title)
+                self.update_view(widget, title, dirPath)
 
 
     @threaded
-    def addToProgramListView(self, widget, title, icon):
+    def update_view(self, widget, title, dirPath):
+        image = self.iconFactory.parseDesktopFiles(dirPath) # .get_pixbuf()
+        if self.showIcons:
+            glib.idle_add(self.addToProgramListView, (widget, title, image,))
+        else:
+            glib.idle_add(self.addToProgramListViewAsText, (widget, title, image,))
+
+
+    def addToProgramListView(self, data):
+        widget, title, img = data
+        icon   = gtk.Image().new_from_pixbuf(img)
         button = gtk.Button(label=title)
+
         button.set_image(icon)
         button.connect("clicked", self.executeProgram)
 
@@ -96,10 +105,10 @@ class MainMenuMixin:
         label.set_size_request(640, 64)
 
         button.show_all()
-        glib.idle_add(widget.add, (button))
+        widget.add(button)
 
-    @threaded
-    def addToProgramListViewAsText(self, widget, title):
+    def addToProgramListViewAsText(self, data):
+        widget, title, icon = data
         button = gtk.Button(label=title)
         button.connect("clicked", self.executeProgram)
 

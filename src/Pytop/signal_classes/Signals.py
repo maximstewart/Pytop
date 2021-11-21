@@ -76,7 +76,7 @@ class Signals(CPUDrawMixin, MainMenuMixin, TaskbarMixin, GridMixin):
         # Program Menu Parts
         self.menuWindow  = self.builder.get_object("menuWindow")
         self.menuWindow.set_keep_above(True);
-        self.showIcons   = False
+        self.showIcons   = True
 
         self.iconFactory = Icon(self.settings)
         self.grpDefault  = "Accessories"
