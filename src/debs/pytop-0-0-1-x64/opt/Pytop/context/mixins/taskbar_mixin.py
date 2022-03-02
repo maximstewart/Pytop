@@ -73,7 +73,7 @@ class TaskbarMixin:
 
 
     # Displays Timer
-    def displayclock(self):
+    def displayClock(self):
         now = datetime.now()
         hms = now.strftime("%I:%M %p")
         mdy = now.strftime("%m/%d/%Y")
@@ -83,7 +83,7 @@ class TaskbarMixin:
 
     # Starting or clock
     def startClock(self):
-        GObject.timeout_add(59000, self.displayclock)
+        GObject.timeout_add(59000, self.displayClock)
 
 
     def closePopup(self, widget, data=None):

@@ -31,6 +31,10 @@ class Controller_Data:
         self.setPagerWidget()
         self.setTasklistWidget()
 
+        # Must be after pager and task list inits
+        self.displayClock()
+        self.startClock()
+
         # CPUDrawMixin Parts
         self.cpu_percents     = []
         self.doDrawBackground = False
