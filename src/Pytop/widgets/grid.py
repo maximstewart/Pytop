@@ -90,20 +90,24 @@ class Grid:
 
 
     def generateGridIcons(self, dir, files):
-        for i, file in enumerate(files):
+        # NOTE: We insure all indecies exist before calling threads that update
+        #       icon positions. In addition, adding the name allows us to see
+        #       the "file" during long or heavy number of icon updates.
+        for file in files:
             self.store.append([None, file])
-            self.create_icon(i, dir, file)
 
+        # Now we update as fast as possible the icons.
+        for i, file in enumerate(files):
+            self.create_icon(i, dir, file)
 
     @threaded
     def create_icon(self, i, dir, file):
-        icon  = self.iconFactory.create_icon(dir, file)
-        fpath = f"{dir}/{file}"
-        GLib.idle_add(self.update_store, (i, icon, fpath,))
+        icon = self.iconFactory.create_icon(dir, file)
+        GLib.idle_add(self.update_store, *(i, icon, dir, file,))
 
-    def update_store(self, item):
-        i, icon, fpath = item
-        itr  = self.store.get_iter(i)
+    def update_store(self, i, icon, dir, file):
+        fpath = f"{dir}/{file}"
+        itr   = self.store.get_iter(i)
 
         if not icon:
             icon = self.get_system_thumbnail(fpath, self.iconFactory.SYS_ICON_WH[0])
