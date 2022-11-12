@@ -47,7 +47,7 @@ class TaskbarMixin:
             self.builder.get_object('systemStats').popup()
 
     def setPagerWidget(self):
-        pager = Wnck.Pager()
+        pager = Wnck.Pager.new()
 
         if self.orientation == 0:
             self.builder.get_object('taskBarWorkspacesHor').add(pager)
@@ -58,7 +58,7 @@ class TaskbarMixin:
 
 
     def setTasklistWidget(self):
-        tasklist = Wnck.Tasklist()
+        tasklist = Wnck.Tasklist.new()
         tasklist.set_scroll_enabled(False)
         tasklist.set_button_relief(2)  # 0 = normal relief, 2 = no relief
         tasklist.set_grouping(1)       # 0 = mever group, 1 auto group, 2 = always group
